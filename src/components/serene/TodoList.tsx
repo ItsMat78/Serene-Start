@@ -95,20 +95,20 @@ export function TodoList() {
   const completedTasks = tasks.filter((task) => task.completed);
 
   return (
-    <div className="relative space-y-8">
+    <div className="relative space-y-10">
       {showConfetti && <Confetti />}
 
-      <motion.div layout className="space-y-8">
+      <motion.div layout className="space-y-10">
         <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg overflow-hidden">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Ongoing</CardTitle>
+            <CardTitle className="font-headline text-2xl text-shadow">Ongoing</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="pb-4">
               <AddTaskForm onAddTask={handleAddTask} />
             </div>
             {ongoingTasks.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                 <AnimatePresence>
                   {ongoingTasks.map((task) => (
                     <TaskItem
@@ -132,10 +132,10 @@ export function TodoList() {
         {completedTasks.length > 0 && (
           <Card className="bg-card/60 backdrop-blur-sm border-border/30 shadow-lg">
             <CardHeader>
-              <CardTitle className="font-headline text-2xl">Completed</CardTitle>
+              <CardTitle className="font-headline text-2xl text-shadow">Completed</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                 <AnimatePresence>
                   {completedTasks.map((task) => (
                     <TaskItem
