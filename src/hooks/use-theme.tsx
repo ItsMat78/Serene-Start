@@ -14,7 +14,7 @@ type ThemeProviderState = {
   customThemeMode: CustomThemeMode;
   setCustomThemeMode: (mode: CustomThemeMode) => void;
   cardBlur: number;
-  setCardBlur: (opacity: number) => void;
+  setCardBlur: (blur: number) => void;
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
