@@ -65,7 +65,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 // New component to apply body styles
 export function ThemeBody({ children }: { children: React.ReactNode }) {
-    const { theme, customWallpaper, setTheme } = useTheme();
+    const { theme, customWallpaper } = useTheme();
 
     const handleWallpaperColorChange = (color: number[]) => {
       // Basic brightness check (luminance formula)

@@ -36,17 +36,17 @@ export default function Home() {
         <div className="hidden lg:flex flex-col lg:flex-row gap-8">
           {/* Left Column */}
           <div className="w-full lg:w-2/3 flex flex-col gap-8">
-            <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg p-6">
+            <div className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg p-6 rounded-lg">
                 <WelcomeMessageWrapper />
-            </Card>
+            </div>
             <TodoList />
           </div>
 
           {/* Right Column */}
           <div className="w-full lg:w-1/3 flex flex-col gap-8">
-            <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg p-6">
+            <div className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg p-6 rounded-lg">
                 <DateTimeDisplay />
-            </Card>
+            </div>
             <div className="w-full">
               <PomodoroTimer />
             </div>
