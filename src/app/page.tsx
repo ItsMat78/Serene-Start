@@ -1,5 +1,6 @@
 import { PomodoroTimer } from '@/components/serene/PomodoroTimer';
 import { TodoList } from '@/components/serene/TodoList';
+import { WelcomeMessage } from '@/components/serene/WelcomeMessage';
 
 export default function Home() {
   return (
@@ -7,10 +8,13 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="flex flex-col items-center gap-12">
           <header className="w-full text-center">
-            <TodoList />
+             {/* The WelcomeMessage is now part of the TodoList, let's pull it out if we want it separate */}
           </header>
-          <div className="flex flex-col md:flex-row gap-8 items-start justify-center w-full">
-            <div className="w-full md:w-auto">
+          <div className="flex flex-col lg:flex-row gap-8 items-start justify-center w-full">
+            <div className="w-full">
+              <TodoList />
+            </div>
+            <div className="w-full lg:w-auto">
               <PomodoroTimer />
             </div>
           </div>
