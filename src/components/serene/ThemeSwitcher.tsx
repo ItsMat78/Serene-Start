@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useTheme } from '@/hooks/use-theme';
 import { Settings, Sun, Moon, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function ThemeSwitcherDialog() {
   const { theme, setTheme, customWallpaper, setCustomWallpaper } = useTheme();
@@ -25,9 +25,9 @@ export function ThemeSwitcherDialog() {
   };
   
   // Sync local state if customWallpaper from context changes
-  useState(() => {
+  useEffect(() => {
     setWallpaperInput(customWallpaper);
-  });
+  }, [customWallpaper]);
 
   return (
     <Dialog>

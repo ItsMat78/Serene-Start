@@ -69,14 +69,13 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
         </motion.button>
 
         <div className="w-full overflow-hidden">
-          {!isExpanded && (
-            <button
-              className="flex items-center h-10 text-left w-full"
-              onClick={() => handleToggle(true)}
-            >
-              <span className="text-muted-foreground">Add a new task...</span>
-            </button>
-          )}
+          <button
+            className="flex items-center h-10 text-left w-full disabled:cursor-text"
+            onClick={() => handleToggle(true)}
+            disabled={isExpanded}
+          >
+            <span className="text-muted-foreground">Add a new task...</span>
+          </button>
 
           <motion.div
             ref={scope}
