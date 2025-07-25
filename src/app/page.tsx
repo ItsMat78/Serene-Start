@@ -1,11 +1,15 @@
 import { DateTimeDisplay } from '@/components/serene/DateTimeDisplay';
 import { PomodoroTimer } from '@/components/serene/PomodoroTimer';
+import { ThemeSwitcherDialog } from '@/components/serene/ThemeSwitcher';
 import { TodoList } from '@/components/serene/TodoList';
 import { WelcomeMessageWrapper } from '@/components/serene/WelcomeMessageWrapper';
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-background text-foreground font-body selection:bg-primary/20">
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeSwitcherDialog />
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Header for mobile */}
         <div className="flex justify-between items-start gap-8 lg:hidden mb-8">
