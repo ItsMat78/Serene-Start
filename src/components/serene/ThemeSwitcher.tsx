@@ -15,9 +15,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useTheme } from '@/hooks/use-theme';
 import { Settings, Sun, Moon, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Slider } from '../ui/slider';
 
 export function ThemeSwitcherDialog() {
-  const { theme, setTheme, customWallpaper, setCustomWallpaper } = useTheme();
+  const { theme, setTheme, customWallpaper, setCustomWallpaper, backgroundDim, setBackgroundDim } = useTheme();
   const [wallpaperInput, setWallpaperInput] = useState(customWallpaper);
 
   const handleApplyWallpaper = () => {
@@ -85,25 +86,38 @@ export function ThemeSwitcherDialog() {
           </div>
 
           {theme === 'custom' && (
-            <div className="space-y-3">
-              <Label htmlFor="wallpaper-url">Background Wallpaper URL</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="wallpaper-url"
-                  placeholder="Paste direct image link here..."
-                  value={wallpaperInput}
-                  onChange={(e) => setWallpaperInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleApplyWallpaper();
-                    }
-                  }}
-                />
-                <Button onClick={handleApplyWallpaper} variant="secondary">Load</Button>
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="wallpaper-url">Background Wallpaper URL</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="wallpaper-url"
+                    placeholder="Paste direct image link here..."
+                    value={wallpaperInput}
+                    onChange={(e) => setWallpaperInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleApplyWallpaper();
+                      }
+                    }}
+                  />
+                  <Button onClick={handleApplyWallpaper} variant="secondary">Load</Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Hint: Right-click an image online and select "Copy Image Address" to get a direct link.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Hint: Right-click an image online and select "Copy Image Address" to get a direct link.
-              </p>
+              <div className="space-y-3">
+                <Label htmlFor="dim-slider">Background Dimness</Label>
+                <Slider
+                  id="dim-slider"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={[backgroundDim]}
+                  onValueChange={(value) => setBackgroundDim(value[0])}
+                />
+              </div>
             </div>
           )}
         </div>

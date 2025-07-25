@@ -9,6 +9,8 @@ type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
   customWallpaper: string;
   setCustomWallpaper: (url: string) => void;
+  backgroundDim: number;
+  setBackgroundDim: (dim: number) => void;
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
@@ -16,14 +18,17 @@ const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undef
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
   const [customWallpaper, setCustomWallpaperState] = useState<string>('');
+  const [backgroundDim, setBackgroundDimState] = useState<number>(0.3);
   
   useEffect(() => {
     try {
         const storedTheme = localStorage.getItem('serene-theme') as Theme | null;
         const storedWallpaper = localStorage.getItem('serene-wallpaper');
+        const storedDim = localStorage.getItem('serene-bg-dim');
         
         if (storedTheme) setThemeState(storedTheme);
         if (storedWallpaper) setCustomWallpaperState(storedWallpaper);
+        if (storedDim) setBackgroundDimState(parseFloat(storedDim));
 
     } catch (e) {
         console.error("Could not access localStorage for theme.", e)
@@ -47,13 +52,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
     setCustomWallpaperState(url);
   };
+
+  const setBackgroundDim = (dim: number) => {
+    try {
+      localStorage.setItem('serene-bg-dim', dim.toString());
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+    setBackgroundDimState(dim);
+  }
   
   const value = useMemo(() => ({
     theme,
     setTheme,
     customWallpaper,
     setCustomWallpaper,
-  }), [theme, customWallpaper]);
+    backgroundDim,
+    setBackgroundDim
+  }), [theme, customWallpaper, backgroundDim]);
 
   return (
     <ThemeProviderContext.Provider value={value}>
@@ -63,7 +79,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function ThemeBody({ children }: { children: React.ReactNode }) {
-    const { theme, customWallpaper } = useTheme();
+    const { theme, customWallpaper, backgroundDim } = useTheme();
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -77,14 +93,14 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
 
         if (theme === 'custom' && customWallpaper) {
             root.classList.add('custom', 'dark');
-            body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${customWallpaper}')`;
+            body.style.backgroundImage = `linear-gradient(rgba(0,0,0,${backgroundDim}), rgba(0,0,0,${backgroundDim})), url('${customWallpaper}')`;
             body.style.backgroundSize = 'cover';
             body.style.backgroundPosition = 'center';
             body.style.backgroundAttachment = 'fixed';
         } else {
             root.classList.add(theme);
         }
-    }, [theme, customWallpaper]);
+    }, [theme, customWallpaper, backgroundDim]);
   
     return (
         <body className="font-body antialiased">
