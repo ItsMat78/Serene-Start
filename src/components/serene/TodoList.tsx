@@ -9,7 +9,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Confetti } from './Confetti';
 import { useToast } from '@/hooks/use-toast';
 import { PartyPopper } from 'lucide-react';
-import { WelcomeMessage } from './WelcomeMessage';
 
 const TASK_COLORS = ['#64B5F6', '#81C784', '#FFD54F', '#FF8A65', '#9575CD', '#F06292'];
 
@@ -32,6 +31,9 @@ export function TodoList() {
   useEffect(() => {
     try {
       localStorage.setItem('serene-tasks', JSON.stringify(tasks));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('tasks-updated', { detail: { tasks } }));
+      }
     } catch (error) {
       console.error('Failed to save tasks to local storage', error);
     }
@@ -95,8 +97,6 @@ export function TodoList() {
   return (
     <div className="relative space-y-8">
       {showConfetti && <Confetti />}
-
-      <WelcomeMessage tasks={ongoingTasks} />
 
       <motion.div layout className="space-y-6">
         <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg overflow-hidden">
