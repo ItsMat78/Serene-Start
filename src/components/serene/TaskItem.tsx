@@ -63,7 +63,25 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
         )}
         style={{ borderTop: `4px solid ${task.completed ? 'transparent' : task.color || 'hsl(var(--primary))'}` }}
       >
-        <CardHeader className="flex-row items-start gap-3 space-y-0 p-4">
+        <CardHeader className="flex-row items-start justify-between gap-3 space-y-0 p-4">
+          <div className="flex-grow space-y-2">
+            {isEditing ? (
+              <Input
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="h-8 flex-grow"
+                autoFocus
+              />
+            ) : (
+              <CardTitle
+                className={`text-base font-medium transition-colors ${
+                  task.completed ? 'text-muted-foreground line-through' : 'text-foreground'
+                }`}
+              >
+                {task.title}
+              </CardTitle>
+            )}
+          </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Checkbox
@@ -96,27 +114,9 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
               </AlertDialogContent>
             )}
           </AlertDialog>
-          <div className="flex-grow space-y-2">
-            {isEditing ? (
-              <Input
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
-                className="h-8 flex-grow"
-                autoFocus
-              />
-            ) : (
-              <CardTitle
-                className={`text-base font-medium transition-colors ${
-                  task.completed ? 'text-muted-foreground line-through' : 'text-foreground'
-                }`}
-              >
-                {task.title}
-              </CardTitle>
-            )}
-          </div>
         </CardHeader>
         <CardContent className="p-4 pt-0 flex-grow">
-          <div className="pl-9 space-y-2">
+          <div className="space-y-2">
             {isEditing ? (
               <Textarea
                 value={editedDescription}
@@ -138,20 +138,6 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
           <div className="flex items-center gap-1">
             {isEditing ? (
               <>
-                <Button variant="ghost" size="icon" className="size-8" onClick={handleSave}>
-                  <Save className="size-4 text-accent" />
-                </Button>
-                <Button variant="ghost" size="icon" className="size-8" onClick={handleCancel}>
-                  <X className="size-4" />
-                </Button>
-              </>
-            ) : (
-              <>
-                {!task.completed && (
-                  <Button variant="ghost" size="icon" className="size-8" onClick={() => setIsEditing(true)}>
-                    <Edit className="size-4" />
-                  </Button>
-                )}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="ghost" size="icon" className="size-8">
@@ -176,6 +162,20 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
                      </AlertDialogFooter>
                    </AlertDialogContent>
                 </AlertDialog>
+                <Button variant="ghost" size="icon" className="size-8" onClick={handleSave}>
+                  <Save className="size-4 text-accent" />
+                </Button>
+                <Button variant="ghost" size="icon" className="size-8" onClick={handleCancel}>
+                  <X className="size-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                {!task.completed && (
+                  <Button variant="ghost" size="icon" className="size-8 opacity-60 hover:opacity-100" onClick={() => setIsEditing(true)}>
+                    <Edit className="size-4" />
+                  </Button>
+                )}
               </>
             )}
           </div>
