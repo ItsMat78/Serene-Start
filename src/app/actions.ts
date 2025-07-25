@@ -1,8 +1,9 @@
 'use server';
 
 import { generateWelcomeMessage } from '@/ai/flows/generate-welcome-message';
+import { Task } from '@/lib/types';
 
-export async function getWelcomeMessageAction(tasks: string[], name?: string) {
+export async function getWelcomeMessageAction(tasks: Array<Pick<Task, 'title' | 'description'>>, name?: string) {
   const date = new Date();
   const dayOfWeek = date.toLocaleString('en-US', { weekday: 'long' });
   const hour = date.getHours();

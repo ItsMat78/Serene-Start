@@ -15,7 +15,10 @@ const WelcomeMessageInputSchema = z.object({
   name: z.string().optional().describe("The user's name."),
   timeOfDay: z.string().describe('The current time of day (e.g., morning, afternoon, evening, night).'),
   dayOfWeek: z.string().describe('The current day of the week (e.g., Monday, Tuesday, Wednesday, etc.).'),
-  tasks: z.array(z.string()).describe('A list of the user\'s current ongoing tasks.'),
+  tasks: z.array(z.object({
+    title: z.string(),
+    description: z.string().optional(),
+  })).describe('A list of the user\'s current ongoing tasks, including their titles and descriptions.'),
 });
 export type WelcomeMessageInput = z.infer<typeof WelcomeMessageInputSchema>;
 
@@ -42,7 +45,7 @@ const prompt = ai.definePrompt({
   - Ongoing tasks:
   {{#if tasks}}
     {{#each tasks}}
-    - {{{this}}}
+    - Title: {{{this.title}}}{{#if this.description}}, Description: {{{this.description}}}{{/if}}
     {{/each}}
   {{else}}
     The user has a clear plate.
@@ -50,7 +53,9 @@ const prompt = ai.definePrompt({
 
   Here's your task:
   1.  **Generate a Welcome Message**: Create a short, engaging, and relevant welcome message. Address the user by name if it's provided. It should be positive, encouraging, and feel spontaneous. For example, instead of "Good morning!", try something like "Rise and shine, Shreyash! A fresh morning for new opportunities." or "Hope you had a great day so far!".
-  2.  **Generate a Focus Suggestion**: Based on their tasks, provide a brief, specific suggestion for what they could focus on. If there are no tasks, provide a general motivating sentence about starting something new or enjoying the quiet moment. For instance, instead of just listing the task, you could say "That 'Design new landing page' task looks like a great creative challenge to jump into."
+  2.  **Generate a Focus Suggestion**: Based on their tasks (including descriptions), provide a brief, specific suggestion for what they could focus on. If there are no tasks, provide a general motivating sentence about starting something new or enjoying the quiet moment. For instance, instead of just listing the task, you could say "That 'Design new landing page' task looks like a great creative challenge to jump into."
+  
+  **IMPORTANT RULE**: Only use the user's name in the 'message' field. DO NOT include their name in the 'focus' field.
 
   Your output must be in JSON format, adhering to the specified schema.
   `,

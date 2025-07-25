@@ -24,8 +24,8 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
     const getMessage = async () => {
       setIsLoading(true);
       try {
-        const taskTitles = tasks.map((t) => t.title).join(',');
-        const cacheKey = `welcomeMessage:${taskTitles}`; // Unique key per task list
+        const tasksIdentifier = tasks.map(t => `${t.title}:${t.description || ''}`).join(',');
+        const cacheKey = `welcomeMessage:${tasksIdentifier}`;
         
         const cachedItem = localStorage.getItem(cacheKey);
 
@@ -40,9 +40,9 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
           }
         }
         
-        const taskTitleList = tasks.map(t => t.title);
+        const taskPayload = tasks.map(({ title, description }) => ({ title, description }));
         // For now, we'll use the hardcoded name. In a real app, this would come from user auth.
-        const result = await getWelcomeMessageAction(taskTitleList, 'Shreyash');
+        const result = await getWelcomeMessageAction(taskPayload, 'Shreyash');
         
         setMessage(result.message);
         setFocus(result.focus);
