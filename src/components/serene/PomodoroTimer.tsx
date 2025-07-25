@@ -85,7 +85,7 @@ export function PomodoroTimer() {
 
         <div className="relative size-48 md:size-56 flex items-center justify-center">
             <svg className="absolute inset-0" viewBox="0 0 100 100">
-                <circle className="stroke-current text-primary/20" strokeWidth="4" cx="50" cy="50" r="45" fill="transparent" />
+                <circle className="stroke-current text-primary/30" strokeWidth="4" cx="50" cy="50" r="45" fill="transparent" />
                 <motion.circle
                   className="stroke-current text-primary"
                   strokeWidth="4"

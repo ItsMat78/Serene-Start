@@ -18,7 +18,7 @@ import { useState, useEffect } from 'react';
 import { Slider } from '../ui/slider';
 
 export function ThemeSwitcherDialog() {
-  const { theme, setTheme, customWallpaper, setCustomWallpaper, customThemeMode, setCustomThemeMode, cardOpacity, setCardOpacity } = useTheme();
+  const { theme, setTheme, customWallpaper, setCustomWallpaper, customThemeMode, setCustomThemeMode, cardBlur, setCardBlur } = useTheme();
   const [wallpaperInput, setWallpaperInput] = useState(customWallpaper);
 
   const handleApplyWallpaper = () => {
@@ -154,16 +154,16 @@ export function ThemeSwitcherDialog() {
               
               <div className="space-y-3">
                 <div className='flex justify-between items-center'>
-                    <Label htmlFor="card-opacity">Card Transparency</Label>
-                    <span className="text-xs font-mono text-muted-foreground">{(cardOpacity * 100).toFixed(0)}%</span>
+                    <Label htmlFor="card-blur">Card Blurriness</Label>
+                    <span className="text-xs font-mono text-muted-foreground">{cardBlur.toFixed(0)}px</span>
                 </div>
                 <Slider
-                    id="card-opacity"
+                    id="card-blur"
                     min={0}
-                    max={1}
-                    step={0.05}
-                    value={[cardOpacity]}
-                    onValueChange={(value) => setCardOpacity(value[0])}
+                    max={32}
+                    step={1}
+                    value={[cardBlur]}
+                    onValueChange={(value) => setCardBlur(value[0])}
                 />
               </div>
             </div>

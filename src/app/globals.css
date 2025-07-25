@@ -38,6 +38,7 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     --card-opacity: 0.1;
+    --card-blur: 12px;
   }
   .dark {
     --background: 224 71% 4%;
@@ -91,8 +92,8 @@
   .custom .bg-card\/60,
   .custom .bg-popover {
     background-color: hsla(0, 0%, 100%, var(--card-opacity));
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
     border-color: hsla(0, 0%, 100%, 0.2);
   }
 
