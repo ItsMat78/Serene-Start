@@ -5,15 +5,12 @@ import { WelcomeMessage } from '@/components/serene/WelcomeMessage';
 export default function Home() {
   return (
     <main className="min-h-screen bg-background text-foreground font-body selection:bg-primary/20">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center gap-8 pt-24">
-          <header className="w-full px-4 text-center">
-            <WelcomeMessage />
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="flex flex-col items-center gap-12">
+          <header className="w-full text-center">
+            <TodoList />
           </header>
           <div className="flex flex-col md:flex-row gap-8 items-start justify-center w-full px-4">
-            <div className="w-full md:w-2/3">
-              <TodoList />
-            </div>
             <div className="w-full md:w-1/3">
               <PomodoroTimer />
             </div>

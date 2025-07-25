@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Confetti } from './Confetti';
 import { useToast } from '@/hooks/use-toast';
 import { PartyPopper } from 'lucide-react';
+import { WelcomeMessage } from './WelcomeMessage';
 
 const TASK_COLORS = ['#64B5F6', '#81C784', '#FFD54F', '#FF8A65', '#9575CD', '#F06292'];
 
@@ -95,6 +96,8 @@ export function TodoList() {
     <div className="relative space-y-8">
       {showConfetti && <Confetti />}
 
+      <WelcomeMessage tasks={ongoingTasks} />
+
       <motion.div layout className="space-y-6">
         <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg overflow-hidden">
           <CardHeader>
@@ -105,7 +108,7 @@ export function TodoList() {
               <AddTaskForm onAddTask={handleAddTask} />
             </div>
             {ongoingTasks.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <AnimatePresence>
                   {ongoingTasks.map((task) => (
                     <TaskItem
@@ -132,7 +135,7 @@ export function TodoList() {
               <CardTitle className="font-headline text-2xl">Completed</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <AnimatePresence>
                   {completedTasks.map((task) => (
                     <TaskItem

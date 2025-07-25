@@ -2,7 +2,7 @@
 
 import { generateWelcomeMessage } from '@/ai/flows/generate-welcome-message';
 
-export async function getWelcomeMessageAction() {
+export async function getWelcomeMessageAction(tasks: string[]) {
   const date = new Date();
   const dayOfWeek = date.toLocaleString('en-US', { weekday: 'long' });
   const hour = date.getHours();
@@ -12,10 +12,13 @@ export async function getWelcomeMessageAction() {
   else if (hour >= 21 || hour < 5) timeOfDay = 'night';
 
   try {
-    const result = await generateWelcomeMessage({ timeOfDay, dayOfWeek });
-    return result.message;
+    const result = await generateWelcomeMessage({ timeOfDay, dayOfWeek, tasks });
+    return result;
   } catch (error) {
     console.error('Failed to generate welcome message:', error);
-    return "Welcome back! Let's make today productive.";
+    return {
+        message: "Welcome back! Let's make today productive.",
+        focus: "Add a task to get started."
+    };
   }
 }
