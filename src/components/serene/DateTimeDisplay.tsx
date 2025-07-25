@@ -14,8 +14,8 @@ export function DateTimeDisplay() {
   if (!date) {
     return (
         <div className="text-right space-y-1">
-            <div className="h-8 w-24 bg-muted rounded-md animate-pulse" />
-            <div className="h-4 w-32 bg-muted rounded-md animate-pulse" />
+            <div className="h-10 w-32 bg-muted rounded-md animate-pulse" />
+            <div className="h-5 w-40 bg-muted rounded-md animate-pulse" />
         </div>
     )
   }
@@ -25,9 +25,9 @@ export function DateTimeDisplay() {
   const dayAndMonth = date.toLocaleDateString('en-US', { day: 'numeric', month: 'long' });
 
   return (
-    <div className="text-right flex-shrink-0">
-      <p className="text-2xl font-semibold text-foreground/90 tabular-nums">{time}</p>
-      <p className="text-sm text-muted-foreground">{day}, {dayAndMonth}</p>
+    <div className="text-right flex-shrink-0 w-full lg:w-72">
+      <p className="text-4xl font-bold text-foreground/90 tabular-nums">{time}</p>
+      <p className="text-base text-muted-foreground">{day}, {dayAndMonth}</p>
     </div>
   );
 }
