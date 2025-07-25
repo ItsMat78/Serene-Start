@@ -44,8 +44,8 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
   }
 
   return (
-    <Card className="bg-card/90 backdrop-blur-sm border-border/60 shadow-lg">
-      <CardContent className="p-4">
+    <Card className="bg-transparent backdrop-blur-none border-none shadow-none">
+      <CardContent className="p-0">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField

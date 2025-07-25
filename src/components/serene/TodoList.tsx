@@ -89,7 +89,6 @@ export function TodoList() {
   return (
     <div className="relative space-y-8">
       {showConfetti && <Confetti />}
-      <AddTaskForm onAddTask={handleAddTask} />
 
       <motion.div layout className="space-y-6">
         <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg overflow-hidden">
@@ -97,6 +96,9 @@ export function TodoList() {
             <CardTitle className="font-headline text-2xl">Ongoing</CardTitle>
           </CardHeader>
           <CardContent>
+             <div className="pb-4">
+               <AddTaskForm onAddTask={handleAddTask} />
+             </div>
             {ongoingTasks.length > 0 ? (
               <ul className="space-y-3">
                 <AnimatePresence>
