@@ -1,12 +1,23 @@
+'use client'
+
 import { DateTimeDisplay } from '@/components/serene/DateTimeDisplay';
 import { PomodoroTimer } from '@/components/serene/PomodoroTimer';
 import { ThemeSwitcherDialog } from '@/components/serene/ThemeSwitcher';
 import { TodoList } from '@/components/serene/TodoList';
 import { WelcomeMessageWrapper } from '@/components/serene/WelcomeMessageWrapper';
+import { useTheme } from '@/hooks/use-theme';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
+  const { theme, customWallpaper } = useTheme();
+
   return (
-    <main className="min-h-screen bg-background text-foreground font-body selection:bg-primary/20">
+    <main 
+      className={cn(
+        "min-h-screen text-foreground font-body selection:bg-primary/20",
+        (theme !== 'custom' || !customWallpaper) && 'bg-background'
+      )}
+    >
       <div className="fixed top-4 right-4 z-50">
         <ThemeSwitcherDialog />
       </div>
