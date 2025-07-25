@@ -100,7 +100,7 @@ export function TodoList() {
 
       <motion.div layout className="space-y-10">
         <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg overflow-hidden">
-          <CardContent className="pt-6">
+          <CardContent className="p-6">
             <div className="pb-4">
               <AddTaskForm onAddTask={handleAddTask} />
             </div>

@@ -58,7 +58,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
     >
       <Card
         className={cn(
-          'bg-card/80 backdrop-blur-sm border-border/50 shadow-lg flex flex-col w-full sm:w-64 h-80',
+          'bg-card/80 backdrop-blur-sm border-border/50 shadow-lg flex flex-col w-full h-80',
           task.completed && 'bg-card/60'
         )}
         style={{ borderTop: `4px solid ${task.completed ? 'transparent' : task.color || 'hsl(var(--primary))'}` }}
