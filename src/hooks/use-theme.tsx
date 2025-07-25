@@ -74,9 +74,13 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
       const newTheme = brightness < 128 ? 'dark' : 'light';
       
       const root = window.document.documentElement;
-      root.classList.remove('light', 'dark', 'custom');
-      // Apply the 'custom' class to get glassmorphism styles, but also light/dark for text color
-      root.classList.add('custom', newTheme);
+      const currentAppliedTheme = root.classList.contains('dark') ? 'dark' : 'light';
+
+      if (newTheme !== currentAppliedTheme) {
+        root.classList.remove('light', 'dark');
+        // Apply the 'custom' class to get glassmorphism styles, but also light/dark for text color
+        root.classList.add('custom', newTheme);
+      }
     };
   
     useEffect(() => {
@@ -90,6 +94,8 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
         body.style.backgroundPosition = 'center';
         body.style.backgroundAttachment = 'fixed';
         // When going to custom theme, we let the ColorThief determine light/dark
+        // We initially set it to dark, and let the color thief correct it.
+        root.classList.add('custom', 'dark');
       } else {
         root.classList.add(theme);
         body.style.backgroundImage = '';

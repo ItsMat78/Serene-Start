@@ -5,6 +5,7 @@ import { PomodoroTimer } from '@/components/serene/PomodoroTimer';
 import { ThemeSwitcherDialog } from '@/components/serene/ThemeSwitcher';
 import { TodoList } from '@/components/serene/TodoList';
 import { WelcomeMessageWrapper } from '@/components/serene/WelcomeMessageWrapper';
+import { Card } from '@/components/ui/card';
 import { useTheme } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
 
@@ -23,27 +24,29 @@ export default function Home() {
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Header for mobile */}
-        <div className="flex justify-between items-start gap-8 lg:hidden mb-8">
+        <div className="flex flex-col gap-8 lg:hidden mb-8">
+          <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg p-6">
             <WelcomeMessageWrapper />
+          </Card>
+          <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg p-6">
             <DateTimeDisplay />
+          </Card>
         </div>
         
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="hidden lg:flex flex-col lg:flex-row gap-8">
           {/* Left Column */}
           <div className="w-full lg:w-2/3 flex flex-col gap-8">
-            <div className="hidden lg:flex justify-between items-start">
-              <div className="w-full">
+            <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg p-6">
                 <WelcomeMessageWrapper />
-              </div>
-            </div>
+            </Card>
             <TodoList />
           </div>
 
           {/* Right Column */}
           <div className="w-full lg:w-1/3 flex flex-col gap-8">
-             <div className="w-full hidden lg:flex justify-end">
+            <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg p-6">
                 <DateTimeDisplay />
-              </div>
+            </Card>
             <div className="w-full">
               <PomodoroTimer />
             </div>
