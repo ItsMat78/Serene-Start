@@ -26,8 +26,8 @@ export function DateTimeDisplay() {
 
   return (
     <div className="text-right flex-shrink-0 w-full lg:w-72">
-      <p className="text-4xl font-bold text-foreground/90 tabular-nums">{time}</p>
-      <p className="text-base text-muted-foreground">{day}, {dayAndMonth}</p>
+      <p className="text-4xl md:text-5xl font-bold text-foreground/90 tabular-nums">{time}</p>
+      <p className="text-lg text-muted-foreground">{day}, {dayAndMonth}</p>
     </div>
   );
 }
