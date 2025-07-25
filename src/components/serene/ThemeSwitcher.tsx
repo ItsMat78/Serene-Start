@@ -109,7 +109,7 @@ export function ThemeSwitcherDialog() {
               </div>
 
               <div>
-                <Label className="text-sm font-medium">Custom Theme Mode</Label>
+                <Label className="text-sm font-medium">Custom Theme UI</Label>
                 <RadioGroup
                   value={customThemeMode}
                   onValueChange={(value) => setCustomThemeMode(value as 'auto' | 'light' | 'dark')}
@@ -132,7 +132,7 @@ export function ThemeSwitcherDialog() {
                         className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                       >
                         <Sun className="mb-3 h-6 w-6" />
-                        Light
+                        Darker elements
                       </Label>
                     </div>
                     <div>
@@ -142,12 +142,12 @@ export function ThemeSwitcherDialog() {
                         className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                       >
                         <Moon className="mb-3 h-6 w-6" />
-                        Dark
+                        Lighter elements
                       </Label>
                     </div>
                 </RadioGroup>
                  <p className="text-xs text-muted-foreground pt-2">
-                  "Auto" tries to detect the best theme. If it fails due to image host restrictions (CORS), select Light or Dark manually.
+                  "Auto" tries to detect the best UI. If it fails due to image host restrictions (CORS), select an option manually.
                 </p>
               </div>
             </div>
