@@ -80,7 +80,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
 
   return (
     <div className="space-y-2">
-        <h1 className="text-2xl font-normal text-foreground/90 tracking-tight transition-all duration-500 animate-in fade-in">
+        <h1 className="text-3xl font-medium text-foreground/90 tracking-tight transition-all duration-500 animate-in fade-in">
           {message}
         </h1>
         {focus && (
