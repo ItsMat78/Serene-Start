@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Trash2, Edit, Save, X, AlertTriangle } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { RenderWithLinks } from './RenderWithLinks';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
@@ -21,7 +20,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Card } from '../ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { cn } from '@/lib/utils';
 
 type TaskItemProps = {
   task: Task;
@@ -51,113 +51,135 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
-      className="group"
+      initial={{ opacity: 0, y: -20, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+      className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.666rem)]"
     >
-      <Card className="bg-background/50 hover:bg-background/70 transition-colors">
-        <Accordion type="single" collapsible>
-          <AccordionItem value={task.id} className="border-b-0">
-            <div className="flex items-center gap-3 p-4">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Checkbox
-                    id={`task-${task.id}`}
-                    checked={task.completed}
-                    className="size-6 rounded-md border-primary/50 data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
-                    aria-label={`Mark ${task.title} as ${task.completed ? 'incomplete' : 'complete'}`}
-                  />
-                </AlertDialogTrigger>
-                {!task.completed && (
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="flex items-center gap-2">
-                        <AlertTriangle className="text-accent" />
-                        Complete Task?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to mark "{task.title}" as complete?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => onToggle(task.id)}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                      >
-                        Complete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                )}
-              </AlertDialog>
-
-              {isEditing ? (
-                <Input
-                  value={editedTitle}
-                  onChange={(e) => setEditedTitle(e.target.value)}
-                  className="h-8 flex-grow"
-                />
-              ) : (
-                <AccordionTrigger className="flex-1 p-0 hover:no-underline justify-start">
-                  <label
-                    htmlFor={`task-${task.id}-trigger`}
-                    className={`flex-1 text-left text-base font-medium transition-colors cursor-pointer ${
-                      task.completed ? 'text-muted-foreground line-through' : 'text-foreground'
-                    }`}
+      <Card
+        className={cn(
+          'bg-background/50 hover:bg-background/70 transition-colors h-full flex flex-col',
+          task.completed && 'bg-background/30'
+        )}
+        style={{ borderTop: `4px solid ${task.completed ? 'transparent' : task.color || 'hsl(var(--primary))'}` }}
+      >
+        <CardHeader className="flex-row items-start gap-3 space-y-0 p-4">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Checkbox
+                id={`task-${task.id}`}
+                checked={task.completed}
+                className="size-6 rounded-md border-primary/50 data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground mt-1"
+                aria-label={`Mark ${task.title} as ${task.completed ? 'incomplete' : 'complete'}`}
+              />
+            </AlertDialogTrigger>
+            {!task.completed && (
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="text-accent" />
+                    Complete Task?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to mark "{task.title}" as complete?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => onToggle(task.id)}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
-                    {task.title}
-                  </label>
-                </AccordionTrigger>
-              )}
-
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                {isEditing ? (
-                  <>
-                    <Button variant="ghost" size="icon" className="size-8" onClick={handleSave}>
-                      <Save className="size-4 text-accent" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="size-8" onClick={handleCancel}>
-                      <X className="size-4" />
-                    </Button>
-                  </>
+                    Complete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            )}
+          </AlertDialog>
+          <div className="flex-grow space-y-2">
+            {isEditing ? (
+              <Input
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="h-8 flex-grow"
+                autoFocus
+              />
+            ) : (
+              <CardTitle
+                className={`text-base font-medium transition-colors ${
+                  task.completed ? 'text-muted-foreground line-through' : 'text-foreground'
+                }`}
+              >
+                {task.title}
+              </CardTitle>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 pt-0 flex-grow">
+          <div className="pl-9 space-y-2">
+            {isEditing ? (
+              <Textarea
+                value={editedDescription}
+                onChange={(e) => setEditedDescription(e.target.value)}
+                placeholder="Add details and links..."
+              />
+            ) : (
+              <div className="text-muted-foreground text-sm prose prose-sm prose-p:my-0 prose-a:text-primary max-w-none">
+                {task.description ? (
+                  <RenderWithLinks text={task.description} />
                 ) : (
-                  <>
-                    {!task.completed && (
-                      <Button variant="ghost" size="icon" className="size-8" onClick={() => setIsEditing(true)}>
-                        <Edit className="size-4" />
-                      </Button>
-                    )}
-                    <Button variant="ghost" size="icon" className="size-8" onClick={() => onDelete(task.id)}>
+                  <p className="italic">No details.</p>
+                )}
+              </div>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="p-2 pt-0 justify-end">
+          <div className="flex items-center gap-1">
+            {isEditing ? (
+              <>
+                <Button variant="ghost" size="icon" className="size-8" onClick={handleSave}>
+                  <Save className="size-4 text-accent" />
+                </Button>
+                <Button variant="ghost" size="icon" className="size-8" onClick={handleCancel}>
+                  <X className="size-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                {!task.completed && (
+                  <Button variant="ghost" size="icon" className="size-8" onClick={() => setIsEditing(true)}>
+                    <Edit className="size-4" />
+                  </Button>
+                )}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-8">
                       <Trash2 className="size-4 text-destructive/80" />
                     </Button>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <AccordionContent className="px-5 pb-4">
-              <div className="pl-9 space-y-2">
-                {isEditing ? (
-                  <Textarea
-                    value={editedDescription}
-                    onChange={(e) => setEditedDescription(e.target.value)}
-                    placeholder="Add details and links..."
-                  />
-                ) : (
-                  <div className="text-muted-foreground text-sm prose prose-sm prose-p:my-0 prose-a:text-primary max-w-none">
-                    {task.description ? (
-                      <RenderWithLinks text={task.description} />
-                    ) : (
-                      <p className="italic">No details.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                     <AlertDialogHeader>
+                       <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                       <AlertDialogDescription>
+                         This action cannot be undone. This will permanently delete the task "{task.title}".
+                       </AlertDialogDescription>
+                     </AlertDialogHeader>
+                     <AlertDialogFooter>
+                       <AlertDialogCancel>Cancel</AlertDialogCancel>
+                       <AlertDialogAction
+                         onClick={() => onDelete(task.id)}
+                         className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                       >
+                         Delete
+                       </AlertDialogAction>
+                     </AlertDialogFooter>
+                   </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
+          </div>
+        </CardFooter>
       </Card>
     </motion.div>
   );

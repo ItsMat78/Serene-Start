@@ -10,6 +10,8 @@ import { Confetti } from './Confetti';
 import { useToast } from '@/hooks/use-toast';
 import { PartyPopper } from 'lucide-react';
 
+const TASK_COLORS = ['#64B5F6', '#81C784', '#FFD54F', '#FF8A65', '#9575CD', '#F06292'];
+
 export function TodoList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -40,6 +42,7 @@ export function TodoList() {
       title,
       description,
       completed: false,
+      color: TASK_COLORS[Math.floor(Math.random() * TASK_COLORS.length)],
     };
     setTasks((prev) => [newTask, ...prev]);
   };
@@ -98,11 +101,11 @@ export function TodoList() {
             <CardTitle className="font-headline text-2xl">Ongoing</CardTitle>
           </CardHeader>
           <CardContent>
-             <div className="pb-4">
-               <AddTaskForm onAddTask={handleAddTask} />
-             </div>
+            <div className="pb-4">
+              <AddTaskForm onAddTask={handleAddTask} />
+            </div>
             {ongoingTasks.length > 0 ? (
-              <ul className="space-y-3">
+              <div className="flex flex-wrap gap-4">
                 <AnimatePresence>
                   {ongoingTasks.map((task) => (
                     <TaskItem
@@ -114,7 +117,7 @@ export function TodoList() {
                     />
                   ))}
                 </AnimatePresence>
-              </ul>
+              </div>
             ) : (
               <p className="text-muted-foreground p-4 text-center">
                 Nothing to do! Add a task above.
@@ -129,7 +132,7 @@ export function TodoList() {
               <CardTitle className="font-headline text-2xl">Completed</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
+              <div className="flex flex-wrap gap-4">
                 <AnimatePresence>
                   {completedTasks.map((task) => (
                     <TaskItem
@@ -141,7 +144,7 @@ export function TodoList() {
                     />
                   ))}
                 </AnimatePresence>
-              </ul>
+              </div>
             </CardContent>
           </Card>
         )}
