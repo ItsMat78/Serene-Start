@@ -18,24 +18,40 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [customWallpaper, setCustomWallpaperState] = useState<string>('');
   
   useEffect(() => {
-    const storedTheme = localStorage.getItem('serene-theme') as Theme | null;
-    const storedWallpaper = localStorage.getItem('serene-wallpaper');
-    
-    if (storedTheme) {
-      setThemeState(storedTheme);
-    }
-    if (storedWallpaper) {
-      setCustomWallpaperState(storedWallpaper);
+    try {
+        const storedTheme = localStorage.getItem('serene-theme') as Theme | null;
+        const storedWallpaper = localStorage.getItem('serene-wallpaper');
+        
+        if (storedTheme) {
+          setThemeState(storedTheme);
+        } else {
+          setThemeState('dark'); // Default to dark if nothing is stored
+        }
+
+        if (storedWallpaper) {
+          setCustomWallpaperState(storedWallpaper);
+        }
+    } catch (e) {
+        // If localStorage is not available, default to dark theme.
+        setThemeState('dark');
     }
   }, []);
 
   const setTheme = (newTheme: Theme) => {
-    localStorage.setItem('serene-theme', newTheme);
+    try {
+        localStorage.setItem('serene-theme', newTheme);
+    } catch (e) {
+        // Ignore localStorage errors
+    }
     setThemeState(newTheme);
   };
   
   const setCustomWallpaper = (url: string) => {
-    localStorage.setItem('serene-wallpaper', url);
+     try {
+        localStorage.setItem('serene-wallpaper', url);
+    } catch (e) {
+        // Ignore localStorage errors
+    }
     setCustomWallpaperState(url);
   };
 
@@ -47,12 +63,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.classList.add(theme);
 
     if (theme === 'custom' && customWallpaper) {
-      body.style.backgroundImage = `url(${customWallpaper})`;
+      body.style.backgroundImage = `url('${customWallpaper}')`;
       body.style.backgroundSize = 'cover';
       body.style.backgroundPosition = 'center';
       body.style.backgroundAttachment = 'fixed';
     } else {
       body.style.backgroundImage = '';
+    }
+
+    return () => {
+        // Cleanup style when component unmounts or theme changes
+        body.style.backgroundImage = '';
     }
   }, [theme, customWallpaper]);
 
@@ -61,7 +82,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme,
     customWallpaper,
     setCustomWallpaper
-  }), [theme, customWallpaper]);
+  }), [theme, customWallpaper, setTheme, setCustomWallpaper]);
 
   return (
     <ThemeProviderContext.Provider value={value}>
