@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Play, Pause, RotateCcw, Coffee, Briefcase } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const PRESETS = {
   pomodoro: 25 * 60,
@@ -116,6 +117,3 @@ export function PomodoroTimer() {
     </Card>
   );
 }
-
-// We need to import motion for this to work
-import { motion } from 'framer-motion';

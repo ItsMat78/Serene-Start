@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import ColorThief from 'color-thief-react';
 
 type Theme = 'light' | 'dark' | 'custom';
 
@@ -15,12 +16,10 @@ type ThemeProviderState = {
 const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // This component will only handle providing the context
-  const [theme, setThemeState] = useState<Theme>('dark'); // Default to dark
+  const [theme, setThemeState] = useState<Theme>('dark');
   const [customWallpaper, setCustomWallpaperState] = useState<string>('');
   
   useEffect(() => {
-    // This effect runs once on the client to get values from localStorage
     try {
         const storedTheme = localStorage.getItem('serene-theme') as Theme | null;
         const storedWallpaper = localStorage.getItem('serene-wallpaper');
@@ -28,7 +27,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         if (storedTheme) setThemeState(storedTheme);
         if (storedWallpaper) setCustomWallpaperState(storedWallpaper);
     } catch (e) {
-        // localStorage might be disabled
         console.error("Could not access localStorage for theme.", e)
     }
   }, []);
@@ -56,7 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme,
     customWallpaper,
     setCustomWallpaper
-  }), [theme, customWallpaper]); // Dependencies updated to reflect functions are stable now
+  }), [theme, customWallpaper]);
 
   return (
     <ThemeProviderContext.Provider value={value}>
@@ -67,32 +65,53 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 // New component to apply body styles
 export function ThemeBody({ children }: { children: React.ReactNode }) {
-    const { theme, customWallpaper } = useTheme();
+    const { theme, customWallpaper, setTheme } = useTheme();
+
+    const handleWallpaperColorChange = (color: number[]) => {
+      // Basic brightness check (luminance formula)
+      const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
+      // If the background is dark, use light text, and vice-versa
+      const newTheme = brightness < 128 ? 'dark' : 'light';
+      
+      const root = window.document.documentElement;
+      root.classList.remove('light', 'dark', 'custom');
+      // Apply the 'custom' class to get glassmorphism styles, but also light/dark for text color
+      root.classList.add('custom', newTheme);
+    };
   
     useEffect(() => {
       const root = window.document.documentElement;
       root.classList.remove('light', 'dark', 'custom');
-      root.classList.add(theme);
-
+      
       const body = window.document.body;
       if (theme === 'custom' && customWallpaper) {
         body.style.backgroundImage = `url('${customWallpaper}')`;
         body.style.backgroundSize = 'cover';
         body.style.backgroundPosition = 'center';
         body.style.backgroundAttachment = 'fixed';
+        // When going to custom theme, we let the ColorThief determine light/dark
       } else {
+        root.classList.add(theme);
         body.style.backgroundImage = '';
       }
   
       return () => {
-          // Cleanup style when component unmounts or theme changes
           body.style.backgroundImage = '';
       }
     }, [theme, customWallpaper]);
   
-    // Use `antialiased` and `font-body` from original RootLayout
     return (
         <body className="font-body antialiased">
+            {theme === 'custom' && customWallpaper && (
+                <ColorThief src={customWallpaper} format="rgbArray" crossOrigin="anonymous">
+                    {({ data }) => {
+                        if (data) {
+                           handleWallpaperColorChange(data);
+                        }
+                        return null;
+                    }}
+                </ColorThief>
+            )}
             {children}
         </body>
     )
