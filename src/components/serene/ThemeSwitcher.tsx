@@ -24,7 +24,7 @@ export function ThemeSwitcherDialog() {
     setCustomWallpaper(wallpaperInput);
   };
   
-  // Sync local state if customWallpaper from context changes
+  // Sync local state if customWallpaper from context changes, e.g. on initial load
   useEffect(() => {
     setWallpaperInput(customWallpaper);
   }, [customWallpaper]);
@@ -91,6 +91,11 @@ export function ThemeSwitcherDialog() {
                   placeholder="Paste direct image link here..."
                   value={wallpaperInput}
                   onChange={(e) => setWallpaperInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleApplyWallpaper();
+                    }
+                  }}
                 />
                 <Button onClick={handleApplyWallpaper} variant="secondary">Load</Button>
               </div>
