@@ -54,7 +54,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
       initial={{ opacity: 0, y: -20, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
-      className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.666rem)]"
+      className="w-full"
     >
       <Card
         className={cn(

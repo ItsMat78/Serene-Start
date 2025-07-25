@@ -105,7 +105,7 @@ export function TodoList() {
               <AddTaskForm onAddTask={handleAddTask} />
             </div>
             {ongoingTasks.length > 0 ? (
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-col gap-4">
                 <AnimatePresence>
                   {ongoingTasks.map((task) => (
                     <TaskItem
@@ -132,7 +132,7 @@ export function TodoList() {
               <CardTitle className="font-headline text-2xl">Completed</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-col gap-4">
                 <AnimatePresence>
                   {completedTasks.map((task) => (
                     <TaskItem
