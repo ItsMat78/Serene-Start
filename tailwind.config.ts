@@ -1,4 +1,5 @@
 import type {Config} from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
 
 export default {
   darkMode: ['class'],
@@ -9,6 +10,11 @@ export default {
   ],
   theme: {
     extend: {
+      textShadow: {
+        sm: '0 1px 2px hsl(var(--foreground) / 0.1)',
+        DEFAULT: '0 2px 4px hsl(var(--foreground) / 0.1)',
+        lg: '0 8px 16px hsl(var(--foreground) / 0.1)',
+      },
       fontFamily: {
         body: ['PT Sans', 'sans-serif'],
         headline: ['PT Sans', 'sans-serif'],
@@ -95,5 +101,17 @@ export default {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    plugin(function ({ matchUtilities, theme }) {
+      matchUtilities(
+        {
+          'text-shadow': (value) => ({
+            textShadow: value,
+          }),
+        },
+        { values: theme('textShadow') }
+      )
+    }),
+  ],
 } satisfies Config;

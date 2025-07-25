@@ -80,11 +80,11 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
 
   return (
     <div className="space-y-2">
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground/90 tracking-tight transition-all duration-500 animate-in fade-in">
+        <h1 className="text-4xl md:text-5xl font-bold text-foreground/90 tracking-tight transition-all duration-500 animate-in fade-in text-shadow-lg">
           {message}
         </h1>
         {focus && (
-            <p className="text-lg text-muted-foreground transition-all duration-500 animate-in fade-in delay-100">
+            <p className="text-lg text-muted-foreground transition-all duration-500 animate-in fade-in delay-100 text-shadow">
                 {focus}
             </p>
         )}

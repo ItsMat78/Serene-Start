@@ -98,7 +98,7 @@ export function TodoList() {
     <div className="relative space-y-8">
       {showConfetti && <Confetti />}
 
-      <motion.div layout className="space-y-6">
+      <motion.div layout className="space-y-8">
         <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg overflow-hidden">
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Ongoing</CardTitle>
@@ -108,7 +108,7 @@ export function TodoList() {
               <AddTaskForm onAddTask={handleAddTask} />
             </div>
             {ongoingTasks.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 <AnimatePresence>
                   {ongoingTasks.map((task) => (
                     <TaskItem
@@ -135,7 +135,7 @@ export function TodoList() {
               <CardTitle className="font-headline text-2xl">Completed</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 <AnimatePresence>
                   {completedTasks.map((task) => (
                     <TaskItem
