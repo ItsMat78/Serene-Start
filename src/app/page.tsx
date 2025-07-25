@@ -27,7 +27,10 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           
-          <div className="lg:col-span-3 flex flex-col lg:flex-row justify-between lg:items-center gap-4">
+          <div className={cn(
+            "lg:col-span-3 flex flex-col lg:flex-row justify-between lg:items-center gap-4",
+            theme === 'custom' && 'bg-card/80 backdrop-blur-sm border-border/50 shadow-lg rounded-lg p-6'
+          )}>
               <WelcomeMessageWrapper />
               {!isMobile && <DateTimeDisplay />}
           </div>

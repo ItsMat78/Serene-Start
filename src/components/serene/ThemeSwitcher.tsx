@@ -15,10 +15,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useTheme } from '@/hooks/use-theme';
 import { Settings, Sun, Moon, Sparkles, Wand2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Slider } from '../ui/slider';
 
 export function ThemeSwitcherDialog() {
-  const { theme, setTheme, customWallpaper, setCustomWallpaper, customThemeMode, setCustomThemeMode, cardBlur, setCardBlur } = useTheme();
+  const { theme, setTheme, customWallpaper, setCustomWallpaper, customThemeMode, setCustomThemeMode } = useTheme();
   const [wallpaperInput, setWallpaperInput] = useState(customWallpaper);
 
   const handleApplyWallpaper = () => {
@@ -150,21 +149,6 @@ export function ThemeSwitcherDialog() {
                  <p className="text-xs text-muted-foreground pt-2">
                   "Auto" tries to detect the best UI. If it fails due to image host restrictions (CORS), select an option manually.
                 </p>
-              </div>
-              
-              <div className="space-y-3">
-                <div className='flex justify-between items-center'>
-                    <Label htmlFor="card-blur">Card Blurriness</Label>
-                    <span className="text-xs font-mono text-muted-foreground">{cardBlur.toFixed(0)}px</span>
-                </div>
-                <Slider
-                    id="card-blur"
-                    min={0}
-                    max={32}
-                    step={1}
-                    value={[cardBlur]}
-                    onValueChange={(value) => setCardBlur(value[0])}
-                />
               </div>
             </div>
           )}
