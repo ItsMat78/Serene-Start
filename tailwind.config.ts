@@ -10,6 +10,9 @@ export default {
   ],
   theme: {
     extend: {
+      boxShadow: {
+        pop: '0 10px 25px -3px hsla(var(--foreground), 0.1), 0 4px 6px -4px hsla(var(--foreground), 0.1), 0 0 0 1px hsla(var(--foreground), 0.05)',
+      },
       textShadow: {
         sm: '0 1px 2px hsl(var(--foreground) / 0.1)',
         DEFAULT: '0 2px 4px hsl(var(--foreground) / 0.1)',

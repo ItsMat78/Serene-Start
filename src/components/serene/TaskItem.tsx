@@ -58,7 +58,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
     >
       <Card
         className={cn(
-          'bg-card/80 backdrop-blur-sm border-border/50 shadow-lg flex flex-col w-full h-64',
+          'bg-card/80 backdrop-blur-sm border-border/50 shadow-pop flex flex-col w-full h-64',
           task.completed && 'bg-card/60'
         )}
         style={{ borderTop: `4px solid ${task.completed ? 'transparent' : task.color || 'hsl(var(--primary))'}` }}
@@ -74,7 +74,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
               />
             ) : (
               <CardTitle
-                className={`text-base font-medium transition-colors ${
+                className={`text-lg font-medium transition-colors ${
                   task.completed ? 'text-muted-foreground line-through' : 'text-foreground'
                 }`}
               >
@@ -124,7 +124,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
                 placeholder="Add details and links..."
               />
             ) : (
-              <div className="text-muted-foreground text-sm prose prose-sm prose-p:my-0 prose-a:text-primary max-w-none">
+              <div className="text-muted-foreground text-base prose prose-sm prose-p:my-0 prose-a:text-primary max-w-none">
                 {task.description ? (
                   <RenderWithLinks text={task.description} />
                 ) : (
