@@ -42,7 +42,8 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
         }
         
         const taskTitleList = tasks.map(t => t.title);
-        const result = await getWelcomeMessageAction(taskTitleList);
+        // For now, we'll use the hardcoded name. In a real app, this would come from user auth.
+        const result = await getWelcomeMessageAction(taskTitleList, 'Shreyash');
         
         setMessage(result.message);
         setFocus(result.focus);
@@ -79,7 +80,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 pr-4">
         <h1 className="text-4xl md:text-5xl font-headline font-bold text-foreground/90 tracking-tight transition-all duration-500 animate-in fade-in">
           {message}
         </h1>
