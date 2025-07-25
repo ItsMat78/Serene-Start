@@ -36,65 +36,72 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
     setIsExpanded(false);
   }
 
-  if (!isExpanded) {
-    return (
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex">
-        <Button onClick={() => setIsExpanded(true)} variant="outline">
-          <Plus className="mr-2 h-4 w-4" />
-          Add a new task
-        </Button>
-      </motion.div>
-    );
-  }
-
   return (
-    <motion.div
-      initial={{ height: 0, opacity: 0 }}
-      animate={{ height: 'auto', opacity: 1 }}
-      exit={{ height: 0, opacity: 0 }}
-      className="w-full"
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 p-4 border rounded-lg bg-background">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="What needs to be done?"
-                    {...field}
-                    className="h-12 text-lg"
-                    autoFocus
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Textarea placeholder="Add details or links (optional)" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={() => setIsExpanded(false)}>
-              <X className="mr-2" /> Cancel
-            </Button>
-            <Button type="submit" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Plus className="mr-2" /> Add Task
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </motion.div>
+    <AnimatePresence initial={false}>
+      {isExpanded ? (
+        <motion.div
+          key="form"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="w-full"
+        >
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 p-4 border rounded-lg bg-background">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="What needs to be done?"
+                        {...field}
+                        className="h-12 text-lg"
+                        autoFocus
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea placeholder="Add details or links (optional)" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="ghost" onClick={() => setIsExpanded(false)}>
+                  <X className="mr-2" /> Cancel
+                </Button>
+                <Button type="submit" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                  <Plus className="mr-2" /> Add Task
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="button"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          className="flex"
+        >
+          <Button onClick={() => setIsExpanded(true)} variant="outline">
+            <Plus className="mr-2 h-4 w-4" />
+            Add a new task
+          </Button>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
