@@ -71,16 +71,16 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-3/4 md:w-1/2 mx-auto" />
-        <Skeleton className="h-4 w-full md:w-2/3 mx-auto" />
+      <div className="space-y-3">
+        <Skeleton className="h-8 w-64 md:w-80" />
+        <Skeleton className="h-4 w-full md:w-96" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-2 pr-4">
-        <h1 className="text-3xl md:text-4xl font-headline font-semibold text-foreground/90 tracking-tight transition-all duration-500 animate-in fade-in">
+    <div className="space-y-2">
+        <h1 className="text-2xl font-normal text-foreground/90 tracking-tight transition-all duration-500 animate-in fade-in">
           {message}
         </h1>
         {focus && (
