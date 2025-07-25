@@ -38,8 +38,8 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
 
   if (!isExpanded) {
     return (
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <Button onClick={() => setIsExpanded(true)} className="w-full" variant="outline">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex">
+        <Button onClick={() => setIsExpanded(true)} variant="outline">
           <Plus className="mr-2 h-4 w-4" />
           Add a new task
         </Button>
@@ -52,6 +52,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
       initial={{ height: 0, opacity: 0 }}
       animate={{ height: 'auto', opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
+      className="w-full"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 p-4 border rounded-lg bg-background">
