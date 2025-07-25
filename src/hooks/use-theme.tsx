@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import ColorThief from 'color-thief-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type Theme = 'light' | 'dark' | 'custom';
 type CustomThemeMode = 'auto' | 'light' | 'dark';
@@ -144,9 +145,14 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
         <body className="font-body antialiased">
             {theme === 'custom' && customWallpaper && customThemeMode === 'auto' && (
                 <ColorThief src={customWallpaper} format="rgbArray" crossOrigin="anonymous">
-                    {({ data }) => {
+                    {({ data, loading }) => {
+                        if (loading) {
+                           // You can return a loading indicator here if you want
+                           return null;
+                        }
                         if (data) {
-                           requestAnimationFrame(() => applyCustomThemeStyles(data))
+                           // Use requestAnimationFrame to ensure styles are applied after the browser has painted
+                           requestAnimationFrame(() => applyCustomThemeStyles(data));
                         }
                         return null;
                     }}
