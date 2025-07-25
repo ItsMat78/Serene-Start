@@ -88,14 +88,14 @@ export function ThemeSwitcherDialog() {
               <div className="flex items-center gap-2">
                 <Input
                   id="wallpaper-url"
-                  placeholder="https://images.unsplash.com/..."
+                  placeholder="Paste direct image link here..."
                   value={wallpaperInput}
                   onChange={(e) => setWallpaperInput(e.target.value)}
                 />
                 <Button onClick={handleApplyWallpaper} variant="secondary">Load</Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Paste a link to any image to set it as your background.
+                Hint: Right-click an image online and select "Copy Image Address" to get a direct link.
               </p>
             </div>
           )}
