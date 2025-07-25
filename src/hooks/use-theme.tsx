@@ -74,13 +74,11 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
       const newTheme = brightness < 128 ? 'dark' : 'light';
       
       const root = window.document.documentElement;
-      const currentAppliedTheme = root.classList.contains('dark') ? 'dark' : 'light';
-
-      if (newTheme !== currentAppliedTheme) {
-        root.classList.remove('light', 'dark');
-        // Apply the 'custom' class to get glassmorphism styles, but also light/dark for text color
-        root.classList.add('custom', newTheme);
-      }
+      
+      // Clear existing theme classes
+      root.classList.remove('light', 'dark');
+      // Apply the 'custom' class for glassmorphism, and the detected theme for text color
+      root.classList.add('custom', newTheme);
     };
   
     useEffect(() => {
@@ -93,9 +91,9 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
         body.style.backgroundSize = 'cover';
         body.style.backgroundPosition = 'center';
         body.style.backgroundAttachment = 'fixed';
-        // When going to custom theme, we let the ColorThief determine light/dark
-        // We initially set it to dark, and let the color thief correct it.
-        root.classList.add('custom', 'dark');
+        // When going to custom theme, we let the ColorThief determine light/dark.
+        // We initially add 'custom' and let the color thief add light/dark.
+        root.classList.add('custom');
       } else {
         root.classList.add(theme);
         body.style.backgroundImage = '';
@@ -112,7 +110,8 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
                 <ColorThief src={customWallpaper} format="rgbArray" crossOrigin="anonymous">
                     {({ data }) => {
                         if (data) {
-                           handleWallpaperColorChange(data);
+                            // Run this in the next frame to ensure the DOM has updated
+                            requestAnimationFrame(() => handleWallpaperColorChange(data));
                         }
                         return null;
                     }}
