@@ -95,22 +95,32 @@
     border-color: hsla(0, 0%, 100%, 0.2);
   }
 
-  .custom {
-    --background: 222 47% 11%;
+  .custom.dark {
     --foreground: 210 40% 98%;
+    --muted-foreground: 215 20% 85%;
     --card-foreground: 210 40% 98%;
     --popover-foreground: 210 40% 98%;
     --primary: 207 82% 68%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: hsla(0, 0%, 100%, 0.1);
-    --muted-foreground: 215 20% 85%;
     --accent: 125 39% 64%;
     --accent-foreground: 210 40% 98%;
+    --border: hsla(0, 0%, 100%, 0.2);
     --input: hsla(0, 0%, 100%, 0.1);
     --ring: 207 82% 68%;
-    --border: hsla(0, 0%, 100%, 0.2);
+  }
+  
+  .custom.light {
+    --foreground: 222.2 84% 4.9%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 207 82% 68%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --accent: 125 39% 64%;
+    --accent-foreground: 125 60% 9%;
+    --border: hsla(222, 84%, 4.9%, 0.2);
+    --input: hsla(222, 84%, 4.9%, 0.1);
+    --ring: 207 82% 68%;
   }
 
   .custom .bg-primary {
@@ -120,7 +130,7 @@
   .custom .bg-accent {
     background-color: hsla(var(--accent), 0.7);
   }
-
+  
   .custom .text-foreground\/90 {
     color: hsl(var(--foreground));
   }

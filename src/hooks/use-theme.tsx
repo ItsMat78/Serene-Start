@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import ColorThief from 'color-thief-react';
 
 type Theme = 'light' | 'dark' | 'custom';
@@ -67,41 +67,39 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function ThemeBody({ children }: { children: React.ReactNode }) {
     const { theme, customWallpaper } = useTheme();
 
-    const handleWallpaperColorChange = (color: number[]) => {
-      // Basic brightness check (luminance formula)
-      const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
-      // If the background is dark, use light text, and vice-versa
-      const newTheme = brightness < 128 ? 'dark' : 'light';
-      
-      const root = window.document.documentElement;
-      
-      // Clear existing theme classes
-      root.classList.remove('light', 'dark');
-      // Apply the 'custom' class for glassmorphism, and the detected theme for text color
-      root.classList.add('custom', newTheme);
-    };
-  
+    const applyCustomThemeStyles = useCallback((color: number[]) => {
+        // Basic brightness check (luminance formula)
+        const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
+        // If the background is dark, use light text, and vice-versa
+        const detectedTheme = brightness < 128 ? 'dark' : 'light';
+        
+        const root = window.document.documentElement;
+        
+        // Clear existing theme classes
+        root.classList.remove('light', 'dark', 'custom');
+        // Apply the 'custom' class for glassmorphism, and the detected theme for text color
+        root.classList.add('custom', detectedTheme);
+    }, []);
+
     useEffect(() => {
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark', 'custom');
-      
-      const body = window.document.body;
-      if (theme === 'custom' && customWallpaper) {
-        body.style.backgroundImage = `url('${customWallpaper}')`;
-        body.style.backgroundSize = 'cover';
-        body.style.backgroundPosition = 'center';
-        body.style.backgroundAttachment = 'fixed';
-        // When going to custom theme, we let the ColorThief determine light/dark.
-        // We initially add 'custom' and let the color thief add light/dark.
-        root.classList.add('custom');
-      } else {
-        root.classList.add(theme);
+        const root = window.document.documentElement;
+        root.classList.remove('light', 'dark', 'custom');
+        
+        const body = window.document.body;
         body.style.backgroundImage = '';
-      }
-  
-      return () => {
-          body.style.backgroundImage = '';
-      }
+        body.style.backgroundSize = '';
+        body.style.backgroundPosition = '';
+        body.style.backgroundAttachment = '';
+
+        if (theme === 'custom' && customWallpaper) {
+            body.style.backgroundImage = `url('${customWallpaper}')`;
+            body.style.backgroundSize = 'cover';
+            body.style.backgroundPosition = 'center';
+            body.style.backgroundAttachment = 'fixed';
+            // We'll let ColorThief apply the correct classes
+        } else {
+            root.classList.add(theme);
+        }
     }, [theme, customWallpaper]);
   
     return (
@@ -111,7 +109,7 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
                     {({ data }) => {
                         if (data) {
                             // Run this in the next frame to ensure the DOM has updated
-                            requestAnimationFrame(() => handleWallpaperColorChange(data));
+                            requestAnimationFrame(() => applyCustomThemeStyles(data));
                         }
                         return null;
                     }}
