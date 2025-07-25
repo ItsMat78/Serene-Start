@@ -56,9 +56,9 @@ export function ThemeSwitcherDialog() {
                 <RadioGroupItem value="light" id="light" className="peer sr-only" />
                 <Label
                   htmlFor="light"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                  className="flex flex-col items-center justify-center gap-2 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                 >
-                  <Sun className="mb-3 h-6 w-6" />
+                  <Sun className="h-6 w-6" />
                   Light
                 </Label>
               </div>
@@ -66,9 +66,9 @@ export function ThemeSwitcherDialog() {
                 <RadioGroupItem value="dark" id="dark" className="peer sr-only" />
                 <Label
                   htmlFor="dark"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                  className="flex flex-col items-center justify-center gap-2 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                 >
-                  <Moon className="mb-3 h-6 w-6" />
+                  <Moon className="h-6 w-6" />
                   Dark
                 </Label>
               </div>
@@ -76,9 +76,9 @@ export function ThemeSwitcherDialog() {
                 <RadioGroupItem value="custom" id="custom" className="peer sr-only" />
                 <Label
                   htmlFor="custom"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                  className="flex flex-col items-center justify-center gap-2 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                 >
-                  <Sparkles className="mb-3 h-6 w-6" />
+                  <Sparkles className="h-6 w-6" />
                   Custom
                 </Label>
               </div>
@@ -119,9 +119,9 @@ export function ThemeSwitcherDialog() {
                       <RadioGroupItem value="auto" id="auto" className="peer sr-only" />
                       <Label
                         htmlFor="auto"
-                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        className="flex flex-col items-center justify-center gap-2 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                       >
-                        <Wand2 className="mb-3 h-6 w-6" />
+                        <Wand2 className="h-6 w-6" />
                         Auto
                       </Label>
                     </div>
@@ -129,9 +129,9 @@ export function ThemeSwitcherDialog() {
                       <RadioGroupItem value="light" id="custom-light" className="peer sr-only" />
                       <Label
                         htmlFor="custom-light"
-                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        className="flex flex-col items-center justify-center gap-2 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                       >
-                        <Sun className="mb-3 h-6 w-6" />
+                        <Sun className="h-6 w-6" />
                         Darker elements
                       </Label>
                     </div>
@@ -139,9 +139,9 @@ export function ThemeSwitcherDialog() {
                       <RadioGroupItem value="dark" id="custom-dark" className="peer sr-only" />
                       <Label
                         htmlFor="custom-dark"
-                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        className="flex flex-col items-center justify-center gap-2 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                       >
-                        <Moon className="mb-3 h-6 w-6" />
+                        <Moon className="h-6 w-6" />
                         Lighter elements
                       </Label>
                     </div>
