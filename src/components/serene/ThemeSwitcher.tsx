@@ -14,13 +14,20 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useTheme } from '@/hooks/use-theme';
 import { Settings, Sun, Moon, Sparkles } from 'lucide-react';
+import { useState } from 'react';
 
 export function ThemeSwitcherDialog() {
   const { theme, setTheme, customWallpaper, setCustomWallpaper } = useTheme();
+  const [wallpaperInput, setWallpaperInput] = useState(customWallpaper);
 
-  const handleWallpaperChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomWallpaper(e.target.value);
+  const handleApplyWallpaper = () => {
+    setCustomWallpaper(wallpaperInput);
   };
+  
+  // Sync local state if customWallpaper from context changes
+  useState(() => {
+    setWallpaperInput(customWallpaper);
+  });
 
   return (
     <Dialog>
@@ -78,12 +85,15 @@ export function ThemeSwitcherDialog() {
           {theme === 'custom' && (
             <div className="space-y-3">
               <Label htmlFor="wallpaper-url">Background Wallpaper URL</Label>
-              <Input
-                id="wallpaper-url"
-                placeholder="https://images.unsplash.com/..."
-                value={customWallpaper}
-                onChange={handleWallpaperChange}
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  id="wallpaper-url"
+                  placeholder="https://images.unsplash.com/..."
+                  value={wallpaperInput}
+                  onChange={(e) => setWallpaperInput(e.target.value)}
+                />
+                <Button onClick={handleApplyWallpaper} variant="secondary">Load</Button>
+              </div>
               <p className="text-xs text-muted-foreground">
                 Paste a link to any image to set it as your background.
               </p>
