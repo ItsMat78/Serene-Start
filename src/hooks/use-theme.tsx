@@ -68,9 +68,6 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
     const { theme, customWallpaper } = useTheme();
 
     const applyCustomThemeStyles = useCallback((color: number[]) => {
-        // This is our temporary debug log.
-        console.log('Detected color:', color);
-
         const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
         const detectedTheme = brightness < 128 ? 'dark' : 'light';
         
