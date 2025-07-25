@@ -46,11 +46,13 @@ export function TodoList() {
 
   const handleToggleTask = (id: string) => {
     let taskTitle = '';
+    let isCompleting = false;
     setTasks((prev) =>
       prev.map((task) => {
         if (task.id === id) {
           if (!task.completed) {
             taskTitle = task.title;
+            isCompleting = true;
           }
           return { ...task, completed: !task.completed };
         }
@@ -58,7 +60,7 @@ export function TodoList() {
       })
     );
 
-    if (taskTitle) {
+    if (isCompleting) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 4000);
       toast({
