@@ -41,45 +41,37 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
       form.reset();
     }
     setIsExpanded(!isExpanded);
-  }
+  };
 
   return (
     <motion.div
       layout
-      className={`p-4 border rounded-lg ${isExpanded ? 'bg-background' : 'bg-transparent border-dashed'}`}
+      onClick={() => !isExpanded && setIsExpanded(true)}
+      className={`p-3 border rounded-lg cursor-pointer ${
+        isExpanded ? 'bg-card border-border cursor-default' : 'bg-transparent border-dashed hover:border-primary/50 hover:bg-primary/5'
+      }`}
       transition={{ layout: { duration: 0.3, type: "spring", bounce: 0.2 } }}
     >
       <div className="flex items-start gap-3">
         <motion.button
           onClick={handleToggle}
-          className="flex-shrink-0 size-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center hover:bg-accent/90 transition-colors"
+          className="flex-shrink-0 size-10 rounded-full bg-accent text-accent-foreground flex items-center justify-center hover:bg-accent/90 transition-colors"
           aria-label={isExpanded ? 'Cancel adding task' : 'Add a new task'}
         >
           <motion.div animate={{ rotate: isExpanded ? 45 : 0 }}>
-            <Plus className="size-6" />
+            <Plus className="size-5" />
           </motion.div>
         </motion.button>
         
         <div className="w-full">
-          <AnimatePresence initial={false} mode="wait">
-            {!isExpanded ? (
-               <motion.div
-                 key="prompt"
-                 initial={{ opacity: 0, x: -10 }}
-                 animate={{ opacity: 1, x: 0 }}
-                 exit={{ opacity: 0, x: -10 }}
-                 transition={{ duration: 0.2 }}
-                 className="flex items-center h-12"
-               >
-                 <span className="text-muted-foreground">Add a new task...</span>
-               </motion.div>
-            ) : (
+          <AnimatePresence initial={false}>
+            {isExpanded ? (
               <motion.div
                 key="form"
                 className="w-full"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, height: 0, y: -10 }}
+                animate={{ opacity: 1, height: 'auto', y: 0, transition: { delay: 0.1 } }}
+                exit={{ opacity: 0, height: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
               >
                 <Form {...form}>
@@ -93,8 +85,9 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                             <Input
                               placeholder="What needs to be done?"
                               {...field}
-                              className="h-12 text-lg"
+                              className="h-10 text-base"
                               autoFocus
+                              onClick={(e) => e.stopPropagation()}
                             />
                           </FormControl>
                           <FormMessage />
@@ -107,7 +100,11 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Textarea placeholder="Add details or links (optional)" {...field} />
+                            <Textarea
+                              placeholder="Add details or links (optional)"
+                              {...field}
+                              onClick={(e) => e.stopPropagation()}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -121,6 +118,16 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                   </form>
                 </Form>
               </motion.div>
+            ) : (
+               <motion.div
+                 key="prompt"
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1, transition: { delay: 0.2 }}}
+                 exit={{ opacity: 0 }}
+                 className="flex items-center h-10"
+               >
+                 <span className="text-muted-foreground">Add a new task...</span>
+               </motion.div>
             )}
           </AnimatePresence>
         </div>
