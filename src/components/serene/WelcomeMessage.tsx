@@ -24,16 +24,15 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
     const getMessage = async () => {
       setIsLoading(true);
       try {
-        const cachedItem = localStorage.getItem('welcomeMessage');
         const taskTitles = tasks.map((t) => t.title).join(',');
+        const cacheKey = `welcomeMessage:${taskTitles}`; // Unique key per task list
         
-        // A simple way to check if tasks have changed to invalidate cache
-        const cacheKey = `welcomeMessage:${taskTitles}`;
+        const cachedItem = localStorage.getItem(cacheKey);
 
         if (cachedItem) {
           const cachedData: CachedMessage = JSON.parse(cachedItem);
-          const oneHour = 60 * 60 * 1000;
-          if (Date.now() - cachedData.timestamp < oneHour) {
+          const thirtyMinutes = 30 * 60 * 1000;
+          if (Date.now() - cachedData.timestamp < thirtyMinutes) {
             setMessage(cachedData.message);
             setFocus(cachedData.focus);
             setIsLoading(false);
@@ -53,7 +52,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
           focus: result.focus,
           timestamp: Date.now(),
         };
-        localStorage.setItem('welcomeMessage', JSON.stringify(newCachedData));
+        localStorage.setItem(cacheKey, JSON.stringify(newCachedData));
       } catch (error) {
         console.error(error);
         setMessage("Welcome! Let's have a great day.");
