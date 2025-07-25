@@ -130,7 +130,7 @@ export function TodoList() {
         </Card>
 
         {completedTasks.length > 0 && (
-          <Card className="bg-card/60 backdrop-blur-sm border-border/30 shadow-md">
+          <Card className="bg-card/60 backdrop-blur-sm border-border/30 shadow-lg">
             <CardHeader>
               <CardTitle className="font-headline text-2xl">Completed</CardTitle>
             </CardHeader>
