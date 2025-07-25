@@ -58,7 +58,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
     >
       <Card
         className={cn(
-          'bg-background/50 hover:bg-background/70 transition-colors h-full flex flex-col',
+          'bg-background/50 hover:bg-background/70 transition-colors flex flex-col',
           task.completed && 'bg-background/30'
         )}
         style={{ borderTop: `4px solid ${task.completed ? 'transparent' : task.color || 'hsl(var(--primary))'}` }}
@@ -134,7 +134,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
             )}
           </div>
         </CardContent>
-        <CardFooter className="p-2 pt-0 justify-end">
+        <CardFooter className="p-2 pt-0 justify-end mt-auto">
           <div className="flex items-center gap-1">
             {isEditing ? (
               <>
