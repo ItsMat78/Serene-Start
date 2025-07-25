@@ -13,6 +13,8 @@ type ThemeProviderState = {
   setCustomWallpaper: (url: string) => void;
   customThemeMode: CustomThemeMode;
   setCustomThemeMode: (mode: CustomThemeMode) => void;
+  cardOpacity: number;
+  setCardOpacity: (opacity: number) => void;
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
@@ -21,16 +23,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
   const [customWallpaper, setCustomWallpaperState] = useState<string>('');
   const [customThemeMode, setCustomThemeModeState] = useState<CustomThemeMode>('auto');
+  const [cardOpacity, setCardOpacityState] = useState<number>(0.1);
   
   useEffect(() => {
     try {
         const storedTheme = localStorage.getItem('serene-theme') as Theme | null;
         const storedWallpaper = localStorage.getItem('serene-wallpaper');
         const storedCustomMode = localStorage.getItem('serene-custom-theme-mode') as CustomThemeMode | null;
+        const storedCardOpacity = localStorage.getItem('serene-card-opacity');
         
         if (storedTheme) setThemeState(storedTheme);
         if (storedWallpaper) setCustomWallpaperState(storedWallpaper);
         if (storedCustomMode) setCustomThemeModeState(storedCustomMode);
+        if (storedCardOpacity) setCardOpacityState(parseFloat(storedCardOpacity));
+
     } catch (e) {
         console.error("Could not access localStorage for theme.", e)
     }
@@ -62,6 +68,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
     setCustomThemeModeState(mode);
   };
+  
+  const setCardOpacity = (opacity: number) => {
+    try {
+      localStorage.setItem('serene-card-opacity', String(opacity));
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+    setCardOpacityState(opacity);
+  };
 
   const value = useMemo(() => ({
     theme,
@@ -70,7 +85,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setCustomWallpaper,
     customThemeMode,
     setCustomThemeMode,
-  }), [theme, customWallpaper, customThemeMode]);
+    cardOpacity,
+    setCardOpacity,
+  }), [theme, customWallpaper, customThemeMode, cardOpacity]);
 
   return (
     <ThemeProviderContext.Provider value={value}>
@@ -81,7 +98,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 // New component to apply body styles
 export function ThemeBody({ children }: { children: React.ReactNode }) {
-    const { theme, customWallpaper, customThemeMode } = useTheme();
+    const { theme, customWallpaper, customThemeMode, cardOpacity } = useTheme();
 
     const applyCustomThemeStyles = useCallback((color?: number[]) => {
         const root = window.document.documentElement;
@@ -102,6 +119,7 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const root = window.document.documentElement;
         root.classList.remove('light', 'dark', 'custom');
+        root.style.setProperty('--card-opacity', String(cardOpacity));
         
         const body = window.document.body;
         body.style.backgroundImage = '';
@@ -120,7 +138,7 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
         } else {
             root.classList.add(theme);
         }
-    }, [theme, customWallpaper, customThemeMode, applyCustomThemeStyles]);
+    }, [theme, customWallpaper, customThemeMode, cardOpacity, applyCustomThemeStyles]);
   
     return (
         <body className="font-body antialiased">

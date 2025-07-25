@@ -15,9 +15,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useTheme } from '@/hooks/use-theme';
 import { Settings, Sun, Moon, Sparkles, Wand2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Slider } from '../ui/slider';
 
 export function ThemeSwitcherDialog() {
-  const { theme, setTheme, customWallpaper, setCustomWallpaper, customThemeMode, setCustomThemeMode } = useTheme();
+  const { theme, setTheme, customWallpaper, setCustomWallpaper, customThemeMode, setCustomThemeMode, cardOpacity, setCardOpacity } = useTheme();
   const [wallpaperInput, setWallpaperInput] = useState(customWallpaper);
 
   const handleApplyWallpaper = () => {
@@ -149,6 +150,21 @@ export function ThemeSwitcherDialog() {
                  <p className="text-xs text-muted-foreground pt-2">
                   "Auto" tries to detect the best UI. If it fails due to image host restrictions (CORS), select an option manually.
                 </p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className='flex justify-between items-center'>
+                    <Label htmlFor="card-opacity">Card Transparency</Label>
+                    <span className="text-xs font-mono text-muted-foreground">{(cardOpacity * 100).toFixed(0)}%</span>
+                </div>
+                <Slider
+                    id="card-opacity"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={[cardOpacity]}
+                    onValueChange={(value) => setCardOpacity(value[0])}
+                />
               </div>
             </div>
           )}
