@@ -37,7 +37,6 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --card-blur: 12px;
   }
   .dark {
     --background: 224 71% 4%;
@@ -95,23 +94,13 @@
 
 @layer components {
   /* Custom theme styles */
-  .custom.light .bg-card,
-  .custom.light .bg-card\/80,
-  .custom.light .bg-card\/60,
-  .custom.light .bg-popover {
-    background-color: hsla(224, 71%, 4%, 0.1);
-    backdrop-filter: blur(var(--card-blur));
-    -webkit-backdrop-filter: blur(var(--card-blur));
-    border-color: hsla(0, 0%, 100%, 0.2);
-  }
-  
   .custom.dark .bg-card,
   .custom.dark .bg-card\/80,
   .custom.dark .bg-card\/60,
   .custom.dark .bg-popover {
     background-color: hsla(0, 0%, 100%, 0.1);
-    backdrop-filter: blur(var(--card-blur));
-    -webkit-backdrop-filter: blur(var(--card-blur));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-color: hsla(0, 0%, 100%, 0.2);
   }
 
@@ -126,20 +115,6 @@
     --accent-foreground: 210 40% 98%;
     --border: hsla(0, 0%, 100%, 0.2);
     --input: hsla(0, 0%, 100%, 0.1);
-    --ring: 207 82% 68%;
-  }
-  
-  .custom.light {
-    --foreground: 222.2 84% 4.9%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 207 82% 68%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --accent: 125 39% 64%;
-    --accent-foreground: 125 60% 9%;
-    --border: hsla(222, 84%, 4.9%, 0.2);
-    --input: hsla(222, 84%, 4.9%, 0.1);
     --ring: 207 82% 68%;
   }
 
