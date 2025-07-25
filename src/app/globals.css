@@ -95,14 +95,24 @@
 
 @layer components {
   /* Custom theme styles */
-  .custom .bg-card,
-  .custom .bg-card\/80,
-  .custom .bg-card\/60,
-  .custom .bg-popover {
+  .custom.light .bg-card,
+  .custom.light .bg-card\/80,
+  .custom.light .bg-card\/60,
+  .custom.light .bg-popover {
     background-color: hsla(0, 0%, 100%, 0.1);
     backdrop-filter: blur(var(--card-blur));
     -webkit-backdrop-filter: blur(var(--card-blur));
     border-color: hsla(0, 0%, 100%, 0.2);
+  }
+  
+  .custom.dark .bg-card,
+  .custom.dark .bg-card\/80,
+  .custom.dark .bg-card\/60,
+  .custom.dark .bg-popover {
+      background-color: hsla(224, 71%, 4%, 0.1);
+      backdrop-filter: blur(var(--card-blur));
+      -webkit-backdrop-filter: blur(var(--card-blur));
+      border-color: hsla(0, 0%, 100%, 0.2);
   }
 
   .custom.dark {
