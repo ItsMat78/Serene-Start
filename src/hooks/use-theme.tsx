@@ -68,16 +68,15 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
     const { theme, customWallpaper } = useTheme();
 
     const applyCustomThemeStyles = useCallback((color: number[]) => {
-        // Basic brightness check (luminance formula)
+        // This is our temporary debug log.
+        console.log('Detected color:', color);
+
         const brightness = (color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000;
-        // If the background is dark, use light text, and vice-versa
         const detectedTheme = brightness < 128 ? 'dark' : 'light';
         
         const root = window.document.documentElement;
         
-        // Clear existing theme classes
         root.classList.remove('light', 'dark', 'custom');
-        // Apply the 'custom' class for glassmorphism, and the detected theme for text color
         root.classList.add('custom', detectedTheme);
     }, []);
 
@@ -96,7 +95,6 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
             body.style.backgroundSize = 'cover';
             body.style.backgroundPosition = 'center';
             body.style.backgroundAttachment = 'fixed';
-            // We'll let ColorThief apply the correct classes
         } else {
             root.classList.add(theme);
         }
@@ -108,7 +106,6 @@ export function ThemeBody({ children }: { children: React.ReactNode }) {
                 <ColorThief src={customWallpaper} format="rgbArray" crossOrigin="anonymous">
                     {({ data }) => {
                         if (data) {
-                            // Run this in the next frame to ensure the DOM has updated
                             requestAnimationFrame(() => applyCustomThemeStyles(data));
                         }
                         return null;
