@@ -62,7 +62,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     if (user) {
-      saveUserData(user.uid, { theme: newTheme });
+      saveUserData(user.uid, { theme: newTheme, customWallpaper, backgroundDim, name });
     } else {
       localStorage.setItem('serene-theme', newTheme);
     }
@@ -71,7 +71,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setCustomWallpaper = (url: string) => {
     setCustomWallpaperState(url);
     if (user) {
-      saveUserData(user.uid, { customWallpaper: url });
+      saveUserData(user.uid, { customWallpaper: url, theme, backgroundDim, name });
     } else {
       localStorage.setItem('serene-wallpaper', url);
     }
@@ -80,7 +80,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setBackgroundDim = (dim: number) => {
     setBackgroundDimState(dim);
     if (user) {
-      saveUserData(user.uid, { backgroundDim: dim });
+      saveUserData(user.uid, { backgroundDim: dim, theme, customWallpaper, name });
     } else {
       localStorage.setItem('serene-bg-dim', dim.toString());
     }
@@ -90,7 +90,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const firstName = newName.trim().split(' ')[0];
     setNameState(firstName);
     if (user) {
-      saveUserData(user.uid, { name: firstName });
+      saveUserData(user.uid, { name: firstName, theme, customWallpaper, backgroundDim });
     } else {
       localStorage.setItem('serene-name', firstName);
     }
