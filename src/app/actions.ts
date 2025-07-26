@@ -1,6 +1,7 @@
 'use server';
 
 import { generateWelcomeMessage } from '@/ai/flows/generate-welcome-message';
+import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { Task } from '@/lib/types';
 
 export async function getWelcomeMessageAction(tasks: Array<Pick<Task, 'title' | 'description'>>, name?: string) {
@@ -22,4 +23,14 @@ export async function getWelcomeMessageAction(tasks: Array<Pick<Task, 'title' | 
         focus: "Add a task to get started."
     };
   }
+}
+
+export async function getGreetingSpeechAction(message: string) {
+    try {
+        const result = await textToSpeech(message);
+        return result;
+    } catch (error) {
+        console.error('Failed to generate speech:', error);
+        return { audio: null };
+    }
 }

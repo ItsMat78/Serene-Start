@@ -1,9 +1,12 @@
 'use client';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { useEffect, useState } from 'react';
-import { getWelcomeMessageAction } from '@/app/actions';
+import { useEffect, useState, useRef } from 'react';
+import { getWelcomeMessageAction, getGreetingSpeechAction } from '@/app/actions';
 import type { Task } from '@/lib/types';
+import { Button } from '../ui/button';
+import { Volume2, Loader, AlertTriangle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 type CachedMessage = {
   message: string;
@@ -19,6 +22,9 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [focus, setFocus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speechError, setSpeechError] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const getMessage = async () => {
@@ -69,6 +75,43 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
     return () => clearTimeout(timer);
   }, [tasks]);
 
+  const handlePlaySpeech = async () => {
+    if (!message || isSpeaking) return;
+
+    setIsSpeaking(true);
+    setSpeechError(null);
+
+    try {
+      const result = await getGreetingSpeechAction(message);
+      if (result.audio) {
+        if (audioRef.current) {
+          audioRef.current.src = result.audio;
+          audioRef.current.play();
+        }
+      } else {
+        throw new Error('Audio generation failed.');
+      }
+    } catch (error) {
+      console.error(error);
+      setSpeechError('Could not play audio. Please try again.');
+    }
+  };
+  
+  useEffect(() => {
+    // Setup audio element and its event listeners
+    const audio = new Audio();
+    audioRef.current = audio;
+
+    const handleEnded = () => setIsSpeaking(false);
+    audio.addEventListener('ended', handleEnded);
+
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+      audio.pause();
+      audioRef.current = null;
+    }
+  }, []);
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -80,12 +123,30 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
 
   return (
     <div className="space-y-2">
+      <div className="flex items-center gap-3">
         <h1 className="text-4xl md:text-5xl font-bold text-foreground/90 tracking-tight transition-all duration-500 animate-in fade-in">
           {message}
         </h1>
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <Button onClick={handlePlaySpeech} variant="ghost" size="icon" className="size-11" disabled={isSpeaking}>
+            {isSpeaking ? (
+                <Loader className="animate-spin" />
+            ) : (
+                <Volume2 className="size-6" />
+            )}
+            <span className="sr-only">Play greeting</span>
+          </Button>
+        </motion.div>
+      </div>
+
         {focus && (
             <p className="text-lg text-muted-foreground transition-all duration-500 animate-in fade-in delay-100">
                 {focus}
+            </p>
+        )}
+        {speechError && (
+             <p className="text-sm text-destructive flex items-center gap-2">
+                <AlertTriangle className="size-4" /> {speechError}
             </p>
         )}
     </div>
