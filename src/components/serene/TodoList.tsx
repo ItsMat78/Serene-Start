@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Task } from '@/lib/types';
 import { AddTaskForm } from './AddTaskForm';
 import { TaskItem } from './TaskItem';
@@ -9,55 +9,18 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Confetti } from './Confetti';
 import { useToast } from '@/hooks/use-toast';
 import { PartyPopper } from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
-import { saveUserData, getUserData } from '@/lib/firestore';
+import { useAppContext } from '@/hooks/use-theme'; // Use the new central context
 
 const TASK_COLORS = ['#64B5F6', '#81C784', '#FFD54F', '#FF8A65', '#9575CD', '#F06292'];
 
-type TodoListProps = {
-  onTasksChange: (tasks: Task[]) => void;
-};
-
-export function TodoList({ onTasksChange }: TodoListProps) {
-  const { user } = useAuth();
-  const [tasks, setTasks] = useState<Task[]>([]);
+// The onTasksChange prop is no longer needed, as state is managed globally.
+export function TodoList() {
+  // Get tasks and the setter function from the central context.
+  const { tasks, setTasks } = useAppContext(); 
   const [showConfetti, setShowConfetti] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const loadTasks = async () => {
-      if (user) {
-        const userData = await getUserData(user.uid);
-        if (userData && userData.tasks) {
-          setTasks(userData.tasks);
-          onTasksChange(userData.tasks);
-        }
-      } else {
-        const storedTasks = localStorage.getItem('serene-tasks');
-        if (storedTasks) {
-          const parsedTasks = JSON.parse(storedTasks);
-          setTasks(parsedTasks);
-          onTasksChange(parsedTasks);
-        }
-      }
-    };
-    loadTasks();
-  }, [user]);
-
-  useEffect(() => {
-    const saveTasks = async () => {
-      if (user) {
-        await saveUserData(user.uid, { tasks });
-      } else {
-        localStorage.setItem('serene-tasks', JSON.stringify(tasks));
-      }
-      onTasksChange(tasks);
-    };
-    // We only save when tasks change, not on initial load
-    if (tasks.length > 0 || (tasks.length === 0 && localStorage.getItem('serene-tasks') !== null)) {
-        saveTasks();
-    }
-  }, [tasks, user]);
+  // All useEffects for loading/saving tasks are GONE. This is now handled centrally.
 
   const handleAddTask = (title: string, description?: string) => {
     const newTask: Task = {
@@ -67,24 +30,26 @@ export function TodoList({ onTasksChange }: TodoListProps) {
       completed: false,
       color: TASK_COLORS[Math.floor(Math.random() * TASK_COLORS.length)],
     };
-    setTasks((prev) => [newTask, ...prev]);
+    // Update the global state
+    setTasks([newTask, ...tasks]);
   };
 
   const handleToggleTask = (id: string) => {
     let taskTitle = '';
     let isCompleting = false;
-    setTasks((prev) =>
-      prev.map((task) => {
-        if (task.id === id) {
-          if (!task.completed) {
-            taskTitle = task.title;
-            isCompleting = true;
-          }
-          return { ...task, completed: !task.completed };
+
+    const updatedTasks = tasks.map((task) => {
+      if (task.id === id) {
+        if (!task.completed) {
+          taskTitle = task.title;
+          isCompleting = true;
         }
-        return task;
-      })
-    );
+        return { ...task, completed: !task.completed };
+      }
+      return task;
+    });
+    
+    setTasks(updatedTasks); // Update the global state
 
     if (isCompleting) {
       setShowConfetti(true);
@@ -102,13 +67,15 @@ export function TodoList({ onTasksChange }: TodoListProps) {
   };
 
   const handleUpdateTask = (id: string, title: string, description?: string) => {
-    setTasks((prev) =>
-      prev.map((task) => (task.id === id ? { ...task, title, description } : task))
+    const updatedTasks = tasks.map((task) => 
+      (task.id === id ? { ...task, title, description } : task)
     );
+    setTasks(updatedTasks); // Update the global state
   };
 
   const handleDeleteTask = (id: string) => {
-    setTasks((prev) => prev.filter((task) => task.id !== id));
+    const updatedTasks = tasks.filter((task) => task.id !== id);
+    setTasks(updatedTasks); // Update the global state
   };
 
   const ongoingTasks = tasks.filter((task) => !task.completed);

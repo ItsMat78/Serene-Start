@@ -7,7 +7,7 @@ import type { Task } from '@/lib/types';
 import { Button } from '../ui/button';
 import { Volume2, Loader, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useTheme } from '@/hooks/use-theme';
+import { useAppContext } from '@/hooks/use-theme'; // Corrected import to useAppContext
 
 type CachedMessage = {
   message: string;
@@ -20,147 +20,157 @@ type WelcomeMessageProps = {
 };
 
 export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
-  const [message, setMessage] = useState<string | null>(null);
-  const [focus, setFocus] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [speechError, setSpeechError] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { name } = useTheme();
+  const { name } = useAppContext(); // Using useAppContext
+  const [welcomeMessage, setWelcomeMessage] = useState<CachedMessage | null>(null);
+  const [messageLoading, setMessageLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [speaking, setSpeaking] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const getMessage = async () => {
-      setIsLoading(true);
+    const fetchWelcomeMessage = async () => {
+      setMessageLoading(true);
+      setError(null);
       try {
-        const tasksIdentifier = tasks.map(t => `${t.title}:${t.description || ''}`).join(',');
-        const cacheKey = `welcomeMessage:${tasksIdentifier}:${name}`;
-        
-        const cachedItem = localStorage.getItem(cacheKey);
+        const currentTime = new Date();
+        const timeOfDay = getTimeOfDay(currentTime.getHours());
+        const dayOfWeek = getDayOfWeek(currentTime.getDay());
 
-        if (cachedItem) {
-          const cachedData: CachedMessage = JSON.parse(cachedItem);
-          const thirtyMinutes = 30 * 60 * 1000;
-          if (Date.now() - cachedData.timestamp < thirtyMinutes) {
-            setMessage(cachedData.message);
-            setFocus(cachedData.focus);
-            setIsLoading(false);
+        const cached = localStorage.getItem('welcomeMessageCache');
+        if (cached) {
+          const parsedCache: CachedMessage = JSON.parse(cached);
+          const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+          if (currentTime.getTime() - parsedCache.timestamp < oneHour) {
+            setWelcomeMessage(parsedCache);
+            setMessageLoading(false);
             return;
           }
         }
-        
-        const taskPayload = tasks.map(({ title, description }) => ({ title, description }));
-        
-        // Get user's local time information
-        const date = new Date();
-        const dayOfWeek = date.toLocaleString('en-US', { weekday: 'long' });
-        const hour = date.getHours();
-        let timeOfDay = 'morning';
-        if (hour >= 12 && hour < 17) timeOfDay = 'afternoon';
-        else if (hour >= 17 && hour < 21) timeOfDay = 'evening';
-        else if (hour >= 21 || hour < 5) timeOfDay = 'night';
 
-        const result = await getWelcomeMessageAction(taskPayload, timeOfDay, dayOfWeek, name || 'Friend');
-        
-        setMessage(result.message);
-        setFocus(result.focus);
+        // CORRECTED: Pass arguments positionally
+        const response = await getWelcomeMessageAction(tasks, timeOfDay, dayOfWeek, name);
 
-        const newCachedData: CachedMessage = {
-          message: result.message,
-          focus: result.focus,
-          timestamp: Date.now(),
-        };
-        localStorage.setItem(cacheKey, JSON.stringify(newCachedData));
-      } catch (error) {
-        console.error(error);
-        setMessage("Welcome! Let's have a great day.");
-        setFocus("What will you accomplish today?");
+        if (response.message && response.focus) {
+          const newMessage: CachedMessage = {
+            message: response.message,
+            focus: response.focus,
+            timestamp: currentTime.getTime(),
+          };
+          setWelcomeMessage(newMessage);
+          localStorage.setItem('welcomeMessageCache', JSON.stringify(newMessage));
+        } else {
+          setError('Failed to load welcome message.');
+        }
+      } catch (err) {
+        console.error('Error fetching welcome message:', err);
+        setError('Failed to load welcome message. Please try again later.');
       } finally {
-        setIsLoading(false);
+        setMessageLoading(false);
       }
     };
-    // Debounce or delay the call slightly to avoid rapid calls on task changes
-    const timer = setTimeout(() => {
-        getMessage();
-    }, 500);
 
-    return () => clearTimeout(timer);
-  }, [tasks, name]);
+    fetchWelcomeMessage();
+  }, [name, tasks]);
 
-  const handlePlaySpeech = async () => {
-    if (!message || isSpeaking) return;
+  const handleSpeakGreeting = async () => {
+    if (speaking) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      setSpeaking(false);
+      return;
+    }
 
-    setIsSpeaking(true);
-    setSpeechError(null);
-    const fullMessage = `${message}. ${focus || ''}`;
+    if (!welcomeMessage?.message) return;
+
+    setSpeaking(true);
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     try {
-      const result = await getGreetingSpeechAction(fullMessage);
-      if (result.audio) {
-        if (audioRef.current) {
-          audioRef.current.src = result.audio;
-          audioRef.current.play();
-        }
+      const audioBase64 = await getGreetingSpeechAction(welcomeMessage.message);
+      if (audioBase64) {
+        const audio = new Audio(`data:audio/mp3;base64,${audioBase64}`);
+        audio.play();
+        audio.onended = () => setSpeaking(false);
+        audio.onpause = () => setSpeaking(false);
+        audio.onerror = (e) => {
+          console.error("Audio playback error:", e);
+          setError("Could not play greeting.");
+          setSpeaking(false);
+        };
       } else {
-        throw new Error('Audio generation failed.');
+        setError("Could not generate speech.");
+        setSpeaking(false);
       }
-    } catch (error) {
-      console.error(error);
-      setSpeechError('Could not play audio. Please try again.');
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log('Speech synthesis aborted');
+      } else {
+        console.error("Error getting greeting speech:", err);
+        setError("Failed to generate speech. " + (err.message || ''));
+      }
+      setSpeaking(false);
     }
   };
-  
-  useEffect(() => {
-    // Setup audio element and its event listeners
-    const audio = new Audio();
-    audioRef.current = audio;
 
-    const handleEnded = () => setIsSpeaking(false);
-    audio.addEventListener('ended', handleEnded);
-
-    return () => {
-      audio.removeEventListener('ended', handleEnded);
-      audio.pause();
-      audioRef.current = null;
-    }
-  }, []);
-
-  if (isLoading) {
+  if (messageLoading) {
     return (
-      <div className="space-y-3">
-        <Skeleton className="h-8 w-64 md:w-80" />
-        <Skeleton className="h-4 w-full md:w-96" />
+      <div className="space-y-4 w-full">
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-6 w-1/2" />
+        <Skeleton className="h-10 w-24" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center space-x-2 text-red-500">
+        <AlertTriangle className="h-5 w-5" />
+        <span>Error: {error}</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground/90 tracking-tight transition-all duration-500 animate-in fade-in">
-          {message}
-        </h1>
-
-        {focus && (
-            <div className="flex items-center gap-3">
-                <p className="text-lg text-muted-foreground transition-all duration-500 animate-in fade-in delay-100">
-                    {focus}
-                </p>
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                  <Button onClick={handlePlaySpeech} variant="ghost" size="icon" className="size-11" disabled={isSpeaking}>
-                    {isSpeaking ? (
-                        <Loader className="animate-spin" />
-                    ) : (
-                        <Volume2 className="size-6" />
-                    )}
-                    <span className="sr-only">Play greeting</span>
-                  </Button>
-                </motion.div>
-            </div>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex-grow max-w-xl"
+    >
+      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-headline font-bold text-shadow leading-tight mb-4">
+        {welcomeMessage?.message}
+      </h1>
+      <p className="text-lg sm:text-xl text-muted-foreground mb-6">
+        {welcomeMessage?.focus}
+      </p>
+      <Button 
+        onClick={handleSpeakGreeting} 
+        variant="outline" 
+        size="lg"
+        disabled={speaking}
+      >
+        {speaking ? (
+          <Loader className="mr-2 h-5 w-5 animate-spin" />
+        ) : (
+          <Volume2 className="mr-2 h-5 w-5" />
         )}
-        {speechError && (
-             <p className="text-sm text-destructive flex items-center gap-2">
-                <AlertTriangle className="size-4" /> {speechError}
-            </p>
-        )}
-    </div>
+        {speaking ? 'Stop Listening' : 'Listen'}
+      </Button>
+    </motion.div>
   );
 }
+
+const getTimeOfDay = (hours: number): string => {
+  if (hours >= 5 && hours < 12) return 'morning';
+  if (hours >= 12 && hours < 17) return 'afternoon';
+  if (hours >= 17 && hours < 21) return 'evening';
+  return 'night';
+};
+
+const getDayOfWeek = (day: number): string => {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return days[day];
+};

@@ -5,37 +5,37 @@ import { PomodoroTimer } from '@/components/serene/PomodoroTimer';
 import { ThemeSwitcherDialog } from '@/components/serene/ThemeSwitcher';
 import { TodoList } from '@/components/serene/TodoList';
 import { WelcomeMessage } from '@/components/serene/WelcomeMessage';
-import { useTheme } from '@/hooks/use-theme';
+import { useAppContext } from '@/hooks/use-theme'; // Use the new central context
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useEffect, useState, useMemo } from 'react';
 import { cn } from "@/lib/utils";
-import type { Task } from '@/lib/types';
-
 
 export default function Home() {
-  const { theme, customWallpaper, name } = useTheme();
+  // Get all state from the central context. No more local state for theme, name, or tasks.
+  const { theme, customWallpaper, name, tasks, isDataLoaded } = useAppContext();
   const isMobile = useIsMobile();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    // Open the settings dialog if the name isn't set after a brief delay
-    const timer = setTimeout(() => {
+    // Wait for data to be loaded before checking if the name is set.
+    if (isDataLoaded) {
+      const timer = setTimeout(() => {
         if (!name) {
-            setIsSettingsOpen(true);
+          setIsSettingsOpen(true);
         }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [name]);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [name, isDataLoaded]);
 
+  // The WelcomeMessage now gets its tasks from the central context.
   const memoizedWelcomeMessage = useMemo(() => (
     <WelcomeMessage tasks={tasks} />
-  ), [tasks, name]);
+  ), [tasks, name]); // name is a dependency to re-render when the user logs in/out
 
-  if (!isMounted) {
-    return null; // or a loading spinner
+  if (!isDataLoaded) {
+    // You can replace this with a more sophisticated loading spinner/skeleton screen
+    return <div className="min-h-screen bg-background" />;
   }
 
   return (
@@ -61,7 +61,8 @@ export default function Home() {
           </div>
 
           <div className="lg:col-span-2">
-            <TodoList onTasksChange={setTasks} />
+            {/* The onTasksChange prop is removed, as TodoList now uses the central context */}
+            <TodoList />
           </div>
 
           <div className="lg:col-span-1">
