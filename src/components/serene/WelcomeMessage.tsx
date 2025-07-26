@@ -47,8 +47,18 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
         }
         
         const taskPayload = tasks.map(({ title, description }) => ({ title, description }));
+        
+        // Get user's local time information
+        const date = new Date();
+        const dayOfWeek = date.toLocaleString('en-US', { weekday: 'long' });
+        const hour = date.getHours();
+        let timeOfDay = 'morning';
+        if (hour >= 12 && hour < 17) timeOfDay = 'afternoon';
+        else if (hour >= 17 && hour < 21) timeOfDay = 'evening';
+        else if (hour >= 21 || hour < 5) timeOfDay = 'night';
+
         // For now, we'll use the hardcoded name. In a real app, this would come from user auth.
-        const result = await getWelcomeMessageAction(taskPayload, 'Shreyash');
+        const result = await getWelcomeMessageAction(taskPayload, timeOfDay, dayOfWeek, 'Shreyash');
         
         setMessage(result.message);
         setFocus(result.focus);
