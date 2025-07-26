@@ -28,35 +28,35 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadUserSettings = async () => {
       if (user) {
-        // User is logged in, load from Firestore
+        // User is logged in. IGNORE localStorage. Load from Firestore.
         const userData = await getUserData(user.uid);
-        if (userData) {
-          setThemeState(userData.theme || 'dark');
-          setCustomWallpaperState(userData.customWallpaper || '');
-          setBackgroundDimState(userData.backgroundDim ?? 0.3);
-          setNameState(userData.name || user.displayName?.split(' ')[0] || '');
-        } else {
-          // No data in Firestore, set name from user profile
-          setNameState(user.displayName?.split(' ')[0] || '');
-        }
+        
+        // Set state from Firestore data, or use defaults if no data exists.
+        setThemeState(userData?.theme || 'dark');
+        setCustomWallpaperState(userData?.customWallpaper || '');
+        // Use nullish coalescing (??) to correctly handle a backgroundDim of 0
+        setBackgroundDimState(userData?.backgroundDim ?? 0.3);
+        setNameState(userData?.name || user.displayName?.split(' ')[0] || '');
+
       } else {
-        // User is not logged in, load from localStorage
+        // User is logged out. Load settings from localStorage.
         const storedTheme = localStorage.getItem('serene-theme') as Theme | null;
         const storedWallpaper = localStorage.getItem('serene-wallpaper');
         const storedDim = localStorage.getItem('serene-bg-dim');
         const storedName = localStorage.getItem('serene-name');
         
-        if (storedTheme) setThemeState(storedTheme);
-        if (storedWallpaper) setCustomWallpaperState(storedWallpaper);
-        if (storedDim) setBackgroundDimState(parseFloat(storedDim));
-        if (storedName) setNameState(storedName);
+        // Set state from localStorage, or use defaults if no local data exists.
+        setThemeState(storedTheme || 'dark');
+        setCustomWallpaperState(storedWallpaper || '');
+        setBackgroundDimState(storedDim ? parseFloat(storedDim) : 0.3);
+        setNameState(storedName || '');
       }
       setIsDataLoaded(true);
     };
 
-    loadData();
+    loadUserSettings();
   }, [user]);
 
   const setTheme = (newTheme: Theme) => {
