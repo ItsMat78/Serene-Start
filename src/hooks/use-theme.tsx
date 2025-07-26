@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
@@ -12,8 +11,6 @@ type ThemeProviderState = {
   setCustomWallpaper: (url: string) => void;
   backgroundDim: number;
   setBackgroundDim: (dim: number) => void;
-  name: string;
-  setName: (name: string) => void;
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
@@ -22,19 +19,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
   const [customWallpaper, setCustomWallpaperState] = useState<string>('');
   const [backgroundDim, setBackgroundDimState] = useState<number>(0.3);
-  const [name, setNameState] = useState<string>('');
   
   useEffect(() => {
     try {
         const storedTheme = localStorage.getItem('serene-theme') as Theme | null;
         const storedWallpaper = localStorage.getItem('serene-wallpaper');
         const storedDim = localStorage.getItem('serene-bg-dim');
-        const storedName = localStorage.getItem('serene-name');
         
         if (storedTheme) setThemeState(storedTheme);
         if (storedWallpaper) setCustomWallpaperState(storedWallpaper);
         if (storedDim) setBackgroundDimState(parseFloat(storedDim));
-        if (storedName) setNameState(storedName);
 
     } catch (e) {
         console.error("Could not access localStorage for theme.", e)
@@ -67,15 +61,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
     setBackgroundDimState(dim);
   }
-
-  const setName = (newName: string) => {
-    try {
-        localStorage.setItem('serene-name', newName);
-    } catch (e) {
-        // Ignore localStorage errors
-    }
-    setNameState(newName);
-  };
   
   const value = useMemo(() => ({
     theme,
@@ -83,10 +68,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     customWallpaper,
     setCustomWallpaper,
     backgroundDim,
-    setBackgroundDim,
-    name,
-    setName
-  }), [theme, customWallpaper, backgroundDim, name]);
+    setBackgroundDim
+  }), [theme, customWallpaper, backgroundDim]);
 
   return (
     <ThemeProviderContext.Provider value={value}>
