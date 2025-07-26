@@ -34,6 +34,15 @@ const GUEST_DEFAULT_STATE: AppState = {
     tasks: [],
 };
 
+// Clears all guest-related data from localStorage.
+const clearGuestData = () => {
+    localStorage.removeItem('serene-theme');
+    localStorage.removeItem('serene-wallpaper');
+    localStorage.removeItem('serene-bg-dim');
+    localStorage.removeItem('serene-name');
+    localStorage.removeItem('serene-tasks');
+};
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [state, setState] = useState<AppState>(GUEST_DEFAULT_STATE);
@@ -45,7 +54,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsDataLoaded(false); // Start loading process
       if (user) {
         // --- USER IS LOGGED IN ---
-        // Fetch their entire profile from Firestore.
         const userData = await getUserData(user.uid);
         setState({
           theme: userData?.theme || GUEST_DEFAULT_STATE.theme,
@@ -54,24 +62,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           name: userData?.name || user.displayName?.split(' ')[0] || GUEST_DEFAULT_STATE.name,
           tasks: userData?.tasks || GUEST_DEFAULT_STATE.tasks,
         });
+        // Clear any lingering guest data from localStorage to prevent conflicts.
+        clearGuestData();
       } else {
         // --- USER IS LOGGED OUT ---
-        // Perform a hard reset to the guest default state first. This prevents data leakage.
+        // Clear any user data from localStorage before setting guest defaults.
+        clearGuestData(); 
+        // Hard reset to the guest default state.
         setState(GUEST_DEFAULT_STATE);
-        // Then, try to load any settings the guest may have saved in localStorage.
-        const storedTheme = localStorage.getItem('serene-theme') as AppState['theme'];
-        const storedWallpaper = localStorage.getItem('serene-wallpaper');
-        const storedDim = localStorage.getItem('serene-bg-dim');
-        const storedName = localStorage.getItem('serene-name');
-        const storedTasks = localStorage.getItem('serene-tasks');
-        
-        setState({
-          theme: storedTheme || GUEST_DEFAULT_STATE.theme,
-          customWallpaper: storedWallpaper || GUEST_DEFAULT_STATE.customWallpaper,
-          backgroundDim: storedDim ? parseFloat(storedDim) : GUEST_DEFAULT_STATE.backgroundDim,
-          name: storedName || GUEST_DEFAULT_STATE.name,
-          tasks: storedTasks ? JSON.parse(storedTasks) : GUEST_DEFAULT_STATE.tasks,
-        });
       }
       setIsDataLoaded(true); // Mark loading as complete
     };
@@ -96,6 +94,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('serene-tasks', JSON.stringify(state.tasks));
     }
   }, [state, user, isDataLoaded]);
+
+    // This useEffect handles applying the theme to the body.
+    useEffect(() => {
+        const root = window.document.documentElement;
+        root.classList.remove('light', 'dark', 'custom');
+        
+        const body = window.document.body;
+        body.style.backgroundImage = '';
+        
+        if (state.theme === 'custom' && state.customWallpaper) {
+            root.classList.add('custom', 'dark'); // Apply custom styles
+            body.style.backgroundImage = `linear-gradient(rgba(0,0,0,${state.backgroundDim}), rgba(0,0,0,${state.backgroundDim})), url('${state.customWallpaper}')`;
+            body.style.backgroundSize = 'cover';
+            body.style.backgroundPosition = 'center';
+            body.style.backgroundAttachment = 'fixed';
+        } else {
+            root.classList.add(state.theme); // Apply standard light/dark theme
+        }
+    }, [state.theme, state.customWallpaper, state.backgroundDim]);
 
   // --- State Update Functions ---
   const setTheme = (theme: AppState['theme']) => setState(s => ({ ...s, theme }));
@@ -128,31 +145,3 @@ export const useAppContext = () => {
   }
   return context;
 };
-
-export function ThemeBody({ children }: { children: React.ReactNode }) {
-    const { theme, customWallpaper, backgroundDim } = useAppContext();
-
-    useEffect(() => {
-        const root = window.document.documentElement;
-        root.classList.remove('light', 'dark', 'custom');
-        
-        const body = window.document.body;
-        body.style.backgroundImage = '';
-        
-        if (theme === 'custom' && customWallpaper) {
-            root.classList.add('custom', 'dark'); // Apply custom styles
-            body.style.backgroundImage = `linear-gradient(rgba(0,0,0,${backgroundDim}), rgba(0,0,0,${backgroundDim})), url('${customWallpaper}')`;
-            body.style.backgroundSize = 'cover';
-            body.style.backgroundPosition = 'center';
-            body.style.backgroundAttachment = 'fixed';
-        } else {
-            root.classList.add(theme); // Apply standard light/dark theme
-        }
-    }, [theme, customWallpaper, backgroundDim]);
-  
-    return (
-        <body className="font-body antialiased">
-            {children}
-        </body>
-    )
-}

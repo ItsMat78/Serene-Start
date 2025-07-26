@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 // Correctly import AppProvider and ThemeBody from the refactored file
-import { AppProvider, ThemeBody } from '@/hooks/use-theme';
+import { AppProvider } from '@/hooks/use-theme';
 import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
@@ -26,10 +26,10 @@ export default function RootLayout({
       {/* Wrap the entire application in the AuthProvider and our new AppProvider */}
       <AuthProvider>
         <AppProvider>
-          <ThemeBody>
+          <body className="font-body antialiased">
             {children}
             <Toaster />
-          </ThemeBody>
+          </body>
         </AppProvider>
       </AuthProvider>
     </html>
