@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -13,12 +14,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useTheme } from '@/hooks/use-theme';
-import { Settings, Sun, Moon, Sparkles } from 'lucide-react';
+import { Settings, Sun, Moon, Sparkles, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Slider } from '../ui/slider';
 
 export function ThemeSwitcherDialog() {
-  const { theme, setTheme, customWallpaper, setCustomWallpaper, backgroundDim, setBackgroundDim } = useTheme();
+  const { theme, setTheme, customWallpaper, setCustomWallpaper, backgroundDim, setBackgroundDim, name, setName } = useTheme();
   const [wallpaperInput, setWallpaperInput] = useState(customWallpaper);
 
   const handleApplyWallpaper = () => {
@@ -39,12 +40,24 @@ export function ThemeSwitcherDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] border-0">
         <DialogHeader>
-          <DialogTitle>Theme Settings</DialogTitle>
+          <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
             Customize the look and feel of your start page.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium flex items-center gap-2"><User className="size-4" /> Profile</Label>
+            <div className="space-y-2">
+                <Label htmlFor="name-input" className="text-xs text-muted-foreground">Your Name</Label>
+                 <Input
+                    id="name-input"
+                    placeholder="Enter your name..."
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+            </div>
+          </div>
           <div>
             <Label className="text-sm font-medium">Appearance</Label>
             <RadioGroup

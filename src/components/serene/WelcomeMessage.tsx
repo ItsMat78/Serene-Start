@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,9 +17,10 @@ type CachedMessage = {
 
 type WelcomeMessageProps = {
   tasks: Task[];
+  name?: string;
 };
 
-export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
+export function WelcomeMessage({ tasks, name }: WelcomeMessageProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [focus, setFocus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +33,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
       setIsLoading(true);
       try {
         const tasksIdentifier = tasks.map(t => `${t.title}:${t.description || ''}`).join(',');
-        const cacheKey = `welcomeMessage:${tasksIdentifier}`;
+        const cacheKey = `welcomeMessage:${name}:${tasksIdentifier}`;
         
         const cachedItem = localStorage.getItem(cacheKey);
 
@@ -57,8 +59,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
         else if (hour >= 17 && hour < 21) timeOfDay = 'evening';
         else if (hour >= 21 || hour < 5) timeOfDay = 'night';
 
-        // For now, we'll use the hardcoded name. In a real app, this would come from user auth.
-        const result = await getWelcomeMessageAction(taskPayload, timeOfDay, dayOfWeek, 'Shreyash');
+        const result = await getWelcomeMessageAction(taskPayload, timeOfDay, dayOfWeek, name);
         
         setMessage(result.message);
         setFocus(result.focus);
@@ -83,7 +84,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [tasks]);
+  }, [tasks, name]);
 
   const handlePlaySpeech = async () => {
     if (!message || isSpeaking) return;

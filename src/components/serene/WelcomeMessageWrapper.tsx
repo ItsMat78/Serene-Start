@@ -1,11 +1,14 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import type { Task } from '@/lib/types';
 import { WelcomeMessage } from './WelcomeMessage';
+import { useTheme } from '@/hooks/use-theme';
 
 export function WelcomeMessageWrapper() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const { name } = useTheme();
 
   useEffect(() => {
     const handleTasksUpdated = (event: Event) => {
@@ -31,5 +34,5 @@ export function WelcomeMessageWrapper() {
   
   const ongoingTasks = tasks.filter((task) => !task.completed);
 
-  return <WelcomeMessage tasks={ongoingTasks} />;
+  return <WelcomeMessage tasks={ongoingTasks} name={name} />;
 }
