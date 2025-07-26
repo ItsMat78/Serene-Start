@@ -5,9 +5,11 @@ import { NameDialog } from '@/components/serene/NameDialog';
 import { PomodoroTimer } from '@/components/serene/PomodoroTimer';
 import { ThemeSwitcherDialog } from '@/components/serene/ThemeSwitcher';
 import { TodoList } from '@/components/serene/TodoList';
+import { WelcomeMessageWrapper } from '@/components/serene/WelcomeMessageWrapper';
 import { useTheme } from '@/hooks/use-theme';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useEffect, useState } from 'react';
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   const { theme, customWallpaper, name } = useTheme();
