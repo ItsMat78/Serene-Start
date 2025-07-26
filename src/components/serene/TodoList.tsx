@@ -9,6 +9,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Confetti } from './Confetti';
 import { useToast } from '@/hooks/use-toast';
 import { PartyPopper } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
+import { saveUserData, getUserData } from '@/lib/firestore';
 
 const TASK_COLORS = ['#64B5F6', '#81C784', '#FFD54F', '#FF8A65', '#9575CD', '#F06292'];
 
@@ -17,34 +19,45 @@ type TodoListProps = {
 };
 
 export function TodoList({ onTasksChange }: TodoListProps) {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    try {
-      const storedTasks = localStorage.getItem('serene-tasks');
-      if (storedTasks) {
-        const parsedTasks = JSON.parse(storedTasks);
-        setTasks(parsedTasks);
-        onTasksChange(parsedTasks);
+    const loadTasks = async () => {
+      if (user) {
+        const userData = await getUserData(user.uid);
+        if (userData && userData.tasks) {
+          setTasks(userData.tasks);
+          onTasksChange(userData.tasks);
+        }
+      } else {
+        const storedTasks = localStorage.getItem('serene-tasks');
+        if (storedTasks) {
+          const parsedTasks = JSON.parse(storedTasks);
+          setTasks(parsedTasks);
+          onTasksChange(parsedTasks);
+        }
       }
-    } catch (error) {
-      console.error('Failed to load tasks from local storage', error);
-    }
-  }, []);
+    };
+    loadTasks();
+  }, [user]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('serene-tasks', JSON.stringify(tasks));
-      onTasksChange(tasks);
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('tasks-updated', { detail: { tasks } }));
+    const saveTasks = async () => {
+      if (user) {
+        await saveUserData(user.uid, { tasks });
+      } else {
+        localStorage.setItem('serene-tasks', JSON.stringify(tasks));
       }
-    } catch (error) {
-      console.error('Failed to save tasks to local storage', error);
+      onTasksChange(tasks);
+    };
+    // We only save when tasks change, not on initial load
+    if (tasks.length > 0 || (tasks.length === 0 && localStorage.getItem('serene-tasks') !== null)) {
+        saveTasks();
     }
-  }, [tasks, onTasksChange]);
+  }, [tasks, user]);
 
   const handleAddTask = (title: string, description?: string) => {
     const newTask: Task = {

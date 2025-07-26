@@ -1,6 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import { useAuth } from './use-auth';
+import { saveUserData, getUserData } from '@/lib/firestore';
 
 type Theme = 'light' | 'dark' | 'custom';
 
@@ -18,13 +20,29 @@ type ThemeProviderState = {
 const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [theme, setThemeState] = useState<Theme>('dark');
   const [customWallpaper, setCustomWallpaperState] = useState<string>('');
   const [backgroundDim, setBackgroundDimState] = useState<number>(0.3);
   const [name, setNameState] = useState<string>('');
-  
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
   useEffect(() => {
-    try {
+    const loadData = async () => {
+      if (user) {
+        // User is logged in, load from Firestore
+        const userData = await getUserData(user.uid);
+        if (userData) {
+          setThemeState(userData.theme || 'dark');
+          setCustomWallpaperState(userData.customWallpaper || '');
+          setBackgroundDimState(userData.backgroundDim || 0.3);
+          setNameState(userData.name || user.displayName?.split(' ')[0] || '');
+        } else {
+          // No data in Firestore, set name from user profile
+          setNameState(user.displayName?.split(' ')[0] || '');
+        }
+      } else {
+        // User is not logged in, load from localStorage
         const storedTheme = localStorage.getItem('serene-theme') as Theme | null;
         const storedWallpaper = localStorage.getItem('serene-wallpaper');
         const storedDim = localStorage.getItem('serene-bg-dim');
@@ -34,47 +52,48 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         if (storedWallpaper) setCustomWallpaperState(storedWallpaper);
         if (storedDim) setBackgroundDimState(parseFloat(storedDim));
         if (storedName) setNameState(storedName);
+      }
+      setIsDataLoaded(true);
+    };
 
-    } catch (e) {
-        console.error("Could not access localStorage for theme.", e)
-    }
-  }, []);
+    loadData();
+  }, [user]);
 
   const setTheme = (newTheme: Theme) => {
-    try {
-        localStorage.setItem('serene-theme', newTheme);
-    } catch (e) {
-        // Ignore localStorage errors
-    }
     setThemeState(newTheme);
+    if (user) {
+      saveUserData(user.uid, { theme: newTheme });
+    } else {
+      localStorage.setItem('serene-theme', newTheme);
+    }
   };
   
   const setCustomWallpaper = (url: string) => {
-     try {
-        localStorage.setItem('serene-wallpaper', url);
-    } catch (e) {
-        // Ignore localStorage errors
-    }
     setCustomWallpaperState(url);
+    if (user) {
+      saveUserData(user.uid, { customWallpaper: url });
+    } else {
+      localStorage.setItem('serene-wallpaper', url);
+    }
   };
 
   const setBackgroundDim = (dim: number) => {
-    try {
-      localStorage.setItem('serene-bg-dim', dim.toString());
-    } catch (e) {
-      // Ignore localStorage errors
-    }
     setBackgroundDimState(dim);
+    if (user) {
+      saveUserData(user.uid, { backgroundDim: dim });
+    } else {
+      localStorage.setItem('serene-bg-dim', dim.toString());
+    }
   }
 
   const setName = (newName: string) => {
     const firstName = newName.trim().split(' ')[0];
-    try {
-        localStorage.setItem('serene-name', firstName);
-    } catch (e) {
-        // Ignore localStorage errors
-    }
     setNameState(firstName);
+    if (user) {
+      saveUserData(user.uid, { name: firstName });
+    } else {
+      localStorage.setItem('serene-name', firstName);
+    }
   };
   
   const value = useMemo(() => ({
@@ -90,7 +109,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProviderContext.Provider value={value}>
-      {children}
+      {isDataLoaded ? children : null}
     </ThemeProviderContext.Provider>
   );
 }
