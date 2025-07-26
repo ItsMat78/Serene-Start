@@ -3,12 +3,11 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { useAuth } from './use-auth';
 import { saveUserData, getUserData } from '@/lib/firestore';
-import { Task } from '@/lib/types'; // Assuming Task type is defined here
+import { Task } from '@/lib/types';
 
-type Theme = 'light' | 'dark' | 'custom';
-
+// This will be the one true state for the application
 type AppState = {
-  theme: Theme;
+  theme: 'light' | 'dark' | 'custom';
   customWallpaper: string;
   backgroundDim: number;
   name: string;
@@ -16,7 +15,7 @@ type AppState = {
 };
 
 type AppContextState = AppState & {
-  setTheme: (theme: Theme) => void;
+  setTheme: (theme: AppState['theme']) => void;
   setCustomWallpaper: (url: string) => void;
   setBackgroundDim: (dim: number) => void;
   setName: (name: string) => void;
@@ -26,8 +25,8 @@ type AppContextState = AppState & {
 
 const AppContext = createContext<AppContextState | undefined>(undefined);
 
-// --- Default Guest State ---
-const defaultState: AppState = {
+// Define the default state for a guest user. This is our clean slate.
+const GUEST_DEFAULT_STATE: AppState = {
     theme: 'dark',
     customWallpaper: '',
     backgroundDim: 0.3,
@@ -37,20 +36,59 @@ const defaultState: AppState = {
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [state, setState] = useState<AppState>(defaultState);
+  const [state, setState] = useState<AppState>(GUEST_DEFAULT_STATE);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  // Effect to SAVE data to the correct source whenever it changes
+  // This useEffect handles LOADING data only when the user logs in or out.
   useEffect(() => {
-    // We only save after the initial data load is complete.
+    const loadData = async () => {
+      setIsDataLoaded(false); // Start loading process
+      if (user) {
+        // --- USER IS LOGGED IN ---
+        // Fetch their entire profile from Firestore.
+        const userData = await getUserData(user.uid);
+        setState({
+          theme: userData?.theme || GUEST_DEFAULT_STATE.theme,
+          customWallpaper: userData?.customWallpaper || GUEST_DEFAULT_STATE.customWallpaper,
+          backgroundDim: userData?.backgroundDim ?? GUEST_DEFAULT_STATE.backgroundDim,
+          name: userData?.name || user.displayName?.split(' ')[0] || GUEST_DEFAULT_STATE.name,
+          tasks: userData?.tasks || GUEST_DEFAULT_STATE.tasks,
+        });
+      } else {
+        // --- USER IS LOGGED OUT ---
+        // Perform a hard reset to the guest default state first. This prevents data leakage.
+        setState(GUEST_DEFAULT_STATE);
+        // Then, try to load any settings the guest may have saved in localStorage.
+        const storedTheme = localStorage.getItem('serene-theme') as AppState['theme'];
+        const storedWallpaper = localStorage.getItem('serene-wallpaper');
+        const storedDim = localStorage.getItem('serene-bg-dim');
+        const storedName = localStorage.getItem('serene-name');
+        const storedTasks = localStorage.getItem('serene-tasks');
+        
+        setState({
+          theme: storedTheme || GUEST_DEFAULT_STATE.theme,
+          customWallpaper: storedWallpaper || GUEST_DEFAULT_STATE.customWallpaper,
+          backgroundDim: storedDim ? parseFloat(storedDim) : GUEST_DEFAULT_STATE.backgroundDim,
+          name: storedName || GUEST_DEFAULT_STATE.name,
+          tasks: storedTasks ? JSON.parse(storedTasks) : GUEST_DEFAULT_STATE.tasks,
+        });
+      }
+      setIsDataLoaded(true); // Mark loading as complete
+    };
+
+    loadData();
+  }, [user]);
+
+  // This useEffect handles SAVING data whenever the state changes.
+  useEffect(() => {
+    // Only save after the initial data has been loaded.
     if (!isDataLoaded) return;
 
     if (user) {
-      // LOGGED IN: Save the entire state to Firestore.
+      // LOGGED IN: Save the entire state object to Firestore.
       saveUserData(user.uid, state);
     } else {
-      // LOGGED OUT: Save individual items to localStorage.
-      // This is more efficient than writing the whole state object on every change for guests.
+      // LOGGED OUT: Save the state to localStorage.
       localStorage.setItem('serene-theme', state.theme);
       localStorage.setItem('serene-wallpaper', state.customWallpaper);
       localStorage.setItem('serene-bg-dim', state.backgroundDim.toString());
@@ -59,45 +97,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state, user, isDataLoaded]);
 
-  // Effect to LOAD data when auth state changes
-  useEffect(() => {
-    const loadData = async () => {
-      setIsDataLoaded(false); // Begin loading
-      if (user) {
-        // --- USER IS LOGGED IN ---
-        const userData = await getUserData(user.uid);
-        setState({
-          theme: userData?.theme || defaultState.theme,
-          customWallpaper: userData?.customWallpaper || defaultState.customWallpaper,
-          backgroundDim: userData?.backgroundDim ?? defaultState.backgroundDim,
-          name: userData?.name || user.displayName?.split(' ')[0] || defaultState.name,
-          tasks: userData?.tasks || defaultState.tasks,
-        });
-      } else {
-        // --- USER IS LOGGED OUT (GUEST) ---
-        const storedTheme = localStorage.getItem('serene-theme') as Theme;
-        const storedWallpaper = localStorage.getItem('serene-wallpaper');
-        const storedDim = localStorage.getItem('serene-bg-dim');
-        const storedName = localStorage.getItem('serene-name');
-        const storedTasks = localStorage.getItem('serene-tasks');
-        
-        setState({
-          theme: storedTheme || defaultState.theme,
-          customWallpaper: storedWallpaper || defaultState.customWallpaper,
-          backgroundDim: storedDim ? parseFloat(storedDim) : defaultState.backgroundDim,
-          name: storedName || defaultState.name,
-          tasks: storedTasks ? JSON.parse(storedTasks) : defaultState.tasks,
-        });
-      }
-      setIsDataLoaded(true); // End loading
-    };
-
-    loadData();
-  }, [user]);
-
   // --- State Update Functions ---
-  // These functions simply update the state. The `useEffect` above handles persistence.
-  const setTheme = (theme: Theme) => setState(s => ({ ...s, theme }));
+  const setTheme = (theme: AppState['theme']) => setState(s => ({ ...s, theme }));
   const setCustomWallpaper = (url: string) => setState(s => ({ ...s, customWallpaper: url }));
   const setBackgroundDim = (dim: number) => setState(s => ({ ...s, backgroundDim: dim }));
   const setName = (name: string) => setState(s => ({ ...s, name: name.trim().split(' ')[0] }));
@@ -115,12 +116,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={contextValue}>
-      {isDataLoaded ? children : null}
+      {children}
     </AppContext.Provider>
   );
 }
 
-// Renaming useTheme to useAppContext for clarity
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
@@ -129,7 +129,6 @@ export const useAppContext = () => {
   return context;
 };
 
-// --- Wrapper component for body styling ---
 export function ThemeBody({ children }: { children: React.ReactNode }) {
     const { theme, customWallpaper, backgroundDim } = useAppContext();
 

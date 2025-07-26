@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useTheme } from '@/hooks/use-theme';
+import { useAppContext } from '@/hooks/use-theme'; // Use the new central context
 import { Settings, Sun, Moon, Sparkles, LogOut } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Slider } from '../ui/slider';
@@ -27,31 +27,33 @@ type ThemeSwitcherDialogProps = {
 };
 
 export function ThemeSwitcherDialog({ open, onOpenChange }: ThemeSwitcherDialogProps) {
-  const { theme, setTheme, customWallpaper, setCustomWallpaper, backgroundDim, setBackgroundDim, name, setName } = useTheme();
+  // Pull all state and setters directly from the new central context.
+  const { theme, setTheme, customWallpaper, setCustomWallpaper, backgroundDim, setBackgroundDim, name, setName } = useAppContext();
   const { user, loading: authLoading } = useAuth();
   
+  // These local state variables are only for user input fields, not for app state.
   const [wallpaperInput, setWallpaperInput] = useState(customWallpaper);
   const [localName, setLocalName] = useState(name || '');
 
+  // Keep local input fields in sync with the global state.
   useEffect(() => {
     setWallpaperInput(customWallpaper);
   }, [customWallpaper]);
 
-  // If a user logs in, set the theme name to their display name if no name is already set
   useEffect(() => {
-    if (user?.displayName && !name) {
-      setName(user.displayName);
-    }
-  }, [user, name, setName]);
+    setLocalName(name || '');
+  }, [name]);
+
 
   const handleApplyWallpaper = () => {
+    // Update the global state. Persistence is handled automatically.
     setCustomWallpaper(wallpaperInput);
   };
 
   const handleLocalNameSave = () => {
     if (localName.trim()) {
+      // Update the global state.
       setName(localName.trim());
-      // If the dialog was forced open, allow it to close now
       if (onOpenChange) {
         onOpenChange(false);
       }
@@ -71,18 +73,12 @@ export function ThemeSwitcherDialog({ open, onOpenChange }: ThemeSwitcherDialogP
   };
 
   const handleSignOut = async () => {
+    // This will trigger the useEffect in the AppProvider to reset the state to guest defaults.
     await signOut(auth);
-    // Reset to default guest state
-    setName('');
-    setTheme('dark');
-    setCustomWallpaper('');
-    setBackgroundDim(0.3);
   };
 
-  // Determine dialog state based on auth and local name
   const isUserAuthenticated = !!user;
-  const hasLocalName = !!name && !isUserAuthenticated;
-  const isInitialSetup = !isUserAuthenticated && !hasLocalName;
+  const isInitialSetup = !user && !name;
 
   const dialogTitle = isInitialSetup ? "Welcome to Serene Start!" : "Settings";
   const dialogDescription = isInitialSetup ? "Sign in to sync your data, or just set a local name to get started." : "Customize your experience.";

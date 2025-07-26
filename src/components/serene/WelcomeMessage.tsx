@@ -7,7 +7,7 @@ import type { Task } from '@/lib/types';
 import { Button } from '../ui/button';
 import { Volume2, Loader, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useAppContext } from '@/hooks/use-theme'; // Corrected import to useAppContext
+import { useAppContext } from '@/hooks/use-theme'; // Use the new central context
 
 type CachedMessage = {
   message: string;
@@ -20,35 +20,40 @@ type WelcomeMessageProps = {
 };
 
 export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
-  const { name } = useAppContext(); // Using useAppContext
+  // Pull the user's name from the central context.
+  const { name } = useAppContext(); 
   const [welcomeMessage, setWelcomeMessage] = useState<CachedMessage | null>(null);
-  const [messageLoading, setMessageLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [speaking, setSpeaking] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const fetchWelcomeMessage = async () => {
-      setMessageLoading(true);
+      setIsLoading(true);
       setError(null);
       try {
         const currentTime = new Date();
         const timeOfDay = getTimeOfDay(currentTime.getHours());
         const dayOfWeek = getDayOfWeek(currentTime.getDay());
+        
+        // Use a simpler cache key that changes when tasks or user name change.
+        const tasksIdentifier = tasks.map(t => t.id).join(',');
+        const cacheKey = `welcomeMessage:${name}:${tasksIdentifier}`;
+        const cached = localStorage.getItem(cacheKey);
 
-        const cached = localStorage.getItem('welcomeMessageCache');
         if (cached) {
           const parsedCache: CachedMessage = JSON.parse(cached);
-          const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+          const oneHour = 60 * 60 * 1000;
           if (currentTime.getTime() - parsedCache.timestamp < oneHour) {
             setWelcomeMessage(parsedCache);
-            setMessageLoading(false);
+            setIsLoading(false);
             return;
           }
         }
 
-        // CORRECTED: Pass arguments positionally
-        const response = await getWelcomeMessageAction(tasks, timeOfDay, dayOfWeek, name);
+        const taskPayload = tasks.map(({ title, description }) => ({ title, description }));
+        const response = await getWelcomeMessageAction(taskPayload, timeOfDay, dayOfWeek, name || undefined);
 
         if (response.message && response.focus) {
           const newMessage: CachedMessage = {
@@ -57,108 +62,94 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
             timestamp: currentTime.getTime(),
           };
           setWelcomeMessage(newMessage);
-          localStorage.setItem('welcomeMessageCache', JSON.stringify(newMessage));
+          localStorage.setItem(cacheKey, JSON.stringify(newMessage));
         } else {
-          setError('Failed to load welcome message.');
+          throw new Error('Failed to get a valid welcome message from the action.');
         }
       } catch (err) {
         console.error('Error fetching welcome message:', err);
-        setError('Failed to load welcome message. Please try again later.');
+        setError('Could not load greeting. Please try again later.');
+        // Set a default message on error
+        setWelcomeMessage({ message: `Let's get to work, ${name || 'friend'}.`, focus: 'What is our first objective?', timestamp: Date.now() });
       } finally {
-        setMessageLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchWelcomeMessage();
   }, [name, tasks]);
 
-  const handleSpeakGreeting = async () => {
-    if (speaking) {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      setSpeaking(false);
-      return;
-    }
+  const handlePlaySpeech = async () => {
+    if (!welcomeMessage?.message || isSpeaking) return;
 
-    if (!welcomeMessage?.message) return;
-
-    setSpeaking(true);
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
+    setIsSpeaking(true);
+    setError(null);
+    const fullMessage = `${welcomeMessage.message} ${welcomeMessage.focus}`;
 
     try {
-      const audioBase64 = await getGreetingSpeechAction(welcomeMessage.message);
-      if (audioBase64) {
-        const audio = new Audio(`data:audio/mp3;base64,${audioBase64}`);
-        audio.play();
-        audio.onended = () => setSpeaking(false);
-        audio.onpause = () => setSpeaking(false);
-        audio.onerror = (e) => {
-          console.error("Audio playback error:", e);
-          setError("Could not play greeting.");
-          setSpeaking(false);
-        };
+      const result = await getGreetingSpeechAction(fullMessage);
+      // CORRECTED: Check for result.audio and assign result.audio to the src
+      if (result && result.audio && audioRef.current) {
+        audioRef.current.src = result.audio;
+        audioRef.current.play();
       } else {
-        setError("Could not generate speech.");
-        setSpeaking(false);
+        throw new Error('Audio generation failed or returned no audio data.');
       }
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
-        console.log('Speech synthesis aborted');
-      } else {
-        console.error("Error getting greeting speech:", err);
-        setError("Failed to generate speech. " + (err.message || ''));
-      }
-      setSpeaking(false);
+    } catch (err) {
+      console.error("Error playing speech:", err);
+      setError("Could not play the greeting.");
+      setIsSpeaking(false);
     }
   };
+  
+  // Setup audio element and its event listeners once.
+  useEffect(() => {
+    const audio = new Audio();
+    audioRef.current = audio;
+    const handleEnded = () => setIsSpeaking(false);
+    audio.addEventListener('ended', handleEnded);
 
-  if (messageLoading) {
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+      audio.pause();
+      audioRef.current = null;
+    }
+  }, []);
+
+
+  if (isLoading) {
     return (
       <div className="space-y-4 w-full">
-        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-10 w-3/4" />
         <Skeleton className="h-6 w-1/2" />
-        <Skeleton className="h-10 w-24" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center space-x-2 text-red-500">
-        <AlertTriangle className="h-5 w-5" />
-        <span>Error: {error}</span>
       </div>
     );
   }
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.4 }}
       className="flex-grow max-w-xl"
     >
       <h1 className="text-4xl sm:text-5xl lg:text-6xl font-headline font-bold text-shadow leading-tight mb-4">
         {welcomeMessage?.message}
       </h1>
-      <p className="text-lg sm:text-xl text-muted-foreground mb-6">
-        {welcomeMessage?.focus}
-      </p>
-      <Button 
-        onClick={handleSpeakGreeting} 
-        variant="outline" 
-        size="lg"
-        disabled={speaking}
-      >
-        {speaking ? (
-          <Loader className="mr-2 h-5 w-5 animate-spin" />
-        ) : (
-          <Volume2 className="mr-2 h-5 w-5" />
-        )}
-        {speaking ? 'Stop Listening' : 'Listen'}
-      </Button>
+      <div className="flex items-center gap-3">
+        <p className="text-lg sm:text-xl text-muted-foreground">
+            {welcomeMessage?.focus}
+        </p>
+        <Button onClick={handlePlaySpeech} variant="ghost" size="icon" className="shrink-0" disabled={isSpeaking}>
+            {isSpeaking ? <Loader className="animate-spin" /> : <Volume2 />}
+            <span className="sr-only">Listen to greeting</span>
+        </Button>
+      </div>
+      {error && (
+        <p className="text-sm text-destructive mt-2 flex items-center gap-2">
+            <AlertTriangle className="size-4" /> {error}
+        </p>
+      )}
     </motion.div>
   );
 }

@@ -13,14 +13,14 @@ import { useAppContext } from '@/hooks/use-theme'; // Use the new central contex
 
 const TASK_COLORS = ['#64B5F6', '#81C784', '#FFD54F', '#FF8A65', '#9575CD', '#F06292'];
 
-// The onTasksChange prop is no longer needed, as state is managed globally.
+// No props are needed anymore. The component is self-sufficient via the context.
 export function TodoList() {
-  // Get tasks and the setter function from the central context.
+  // Get tasks and the global setter function from our new central context.
   const { tasks, setTasks } = useAppContext(); 
   const [showConfetti, setShowConfetti] = useState(false);
   const { toast } = useToast();
 
-  // All useEffects for loading/saving tasks are GONE. This is now handled centrally.
+  // All old useEffects for loading/saving are GONE. This is now handled centrally.
 
   const handleAddTask = (title: string, description?: string) => {
     const newTask: Task = {
@@ -30,7 +30,7 @@ export function TodoList() {
       completed: false,
       color: TASK_COLORS[Math.floor(Math.random() * TASK_COLORS.length)],
     };
-    // Update the global state
+    // Update the global state. The central useEffect will handle persistence.
     setTasks([newTask, ...tasks]);
   };
 

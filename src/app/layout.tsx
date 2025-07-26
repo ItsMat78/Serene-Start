@@ -1,7 +1,8 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
-import { AppProvider, ThemeBody } from '@/hooks/use-theme'; // Corrected import to AppProvider
+// Correctly import AppProvider and ThemeBody from the refactored file
+import { AppProvider, ThemeBody } from '@/hooks/use-theme';
 import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
@@ -22,14 +23,15 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,701&display=swap" rel="stylesheet" />
       </head>
-      <AppProvider> {/* Changed ThemeProvider to AppProvider */}
-        <AuthProvider>
+      {/* Wrap the entire application in the AuthProvider and our new AppProvider */}
+      <AuthProvider>
+        <AppProvider>
           <ThemeBody>
             {children}
             <Toaster />
           </ThemeBody>
-        </AuthProvider>
-      </AppProvider>
+        </AppProvider>
+      </AuthProvider>
     </html>
   );
 }
