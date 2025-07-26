@@ -7,6 +7,7 @@ import type { Task } from '@/lib/types';
 import { Button } from '../ui/button';
 import { Volume2, Loader, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTheme } from '@/hooks/use-theme';
 
 type CachedMessage = {
   message: string;
@@ -25,13 +26,14 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { name } = useTheme();
 
   useEffect(() => {
     const getMessage = async () => {
       setIsLoading(true);
       try {
         const tasksIdentifier = tasks.map(t => `${t.title}:${t.description || ''}`).join(',');
-        const cacheKey = `welcomeMessage:${tasksIdentifier}`;
+        const cacheKey = `welcomeMessage:${tasksIdentifier}:${name}`;
         
         const cachedItem = localStorage.getItem(cacheKey);
 
@@ -57,8 +59,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
         else if (hour >= 17 && hour < 21) timeOfDay = 'evening';
         else if (hour >= 21 || hour < 5) timeOfDay = 'night';
 
-        // For now, we'll use the hardcoded name. In a real app, this would come from user auth.
-        const result = await getWelcomeMessageAction(taskPayload, timeOfDay, dayOfWeek, 'Shreyash');
+        const result = await getWelcomeMessageAction(taskPayload, timeOfDay, dayOfWeek, name || 'Friend');
         
         setMessage(result.message);
         setFocus(result.focus);
@@ -83,7 +84,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [tasks]);
+  }, [tasks, name]);
 
   const handlePlaySpeech = async () => {
     if (!message || isSpeaking) return;

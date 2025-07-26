@@ -23,7 +23,7 @@ const WelcomeMessageInputSchema = z.object({
 export type WelcomeMessageInput = z.infer<typeof WelcomeMessageInputSchema>;
 
 const WelcomeMessageOutputSchema = z.object({
-  message: z.string().describe('A personalized, motivating welcome message. It should be creative and not sound like a template.'),
+  message: z.string().describe('A personalized, motivating welcome message. It should be creative and not sound like a template. But dont sound too excited.'),
   focus: z.string().describe('A short suggestion on what the user could focus on, based on their tasks. Can be an empty string if there are no tasks. Be specific and encouraging.'),
 });
 export type WelcomeMessageOutput = z.infer<typeof WelcomeMessageOutputSchema>;

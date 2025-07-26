@@ -17,34 +17,82 @@ import { Settings, Sun, Moon, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Slider } from '../ui/slider';
 
-export function ThemeSwitcherDialog() {
-  const { theme, setTheme, customWallpaper, setCustomWallpaper, backgroundDim, setBackgroundDim } = useTheme();
-  const [wallpaperInput, setWallpaperInput] = useState(customWallpaper);
+type ThemeSwitcherDialogProps = {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
 
-  const handleApplyWallpaper = () => {
-    setCustomWallpaper(wallpaperInput);
-  };
-  
+export function ThemeSwitcherDialog({ open, onOpenChange }: ThemeSwitcherDialogProps) {
+  const { theme, setTheme, customWallpaper, setCustomWallpaper, backgroundDim, setBackgroundDim, name, setName } = useTheme();
+  const [wallpaperInput, setWallpaperInput] = useState(customWallpaper);
+  const [localName, setLocalName] = useState(name || '');
+
   useEffect(() => {
     setWallpaperInput(customWallpaper);
   }, [customWallpaper]);
 
+  useEffect(() => {
+    setLocalName(name || '');
+  }, [name]);
+
+  const handleApplyWallpaper = () => {
+    setCustomWallpaper(wallpaperInput);
+  };
+
+  const handleNameSave = () => {
+    if (localName.trim()) {
+      setName(localName.trim());
+      // If the dialog was forced open, allow it to close now
+      if (onOpenChange) {
+        onOpenChange(false);
+      }
+    }
+  };
+
+  const dialogTitle = name ? "Settings" : "Welcome to Serene Start!";
+  const dialogDescription = name ? "Customize your experience." : "What should I call you?";
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon">
           <Settings />
           <span className="sr-only">Theme Settings</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] border-0">
+       <DialogContent 
+        className="sm:max-w-[425px] border-0"
+        onInteractOutside={(e) => {
+            // Prevent closing by clicking outside if no name is set
+            if (!name) {
+                e.preventDefault();
+            }
+        }}
+        hideCloseButton={!name}
+       >
         <DialogHeader>
-          <DialogTitle>Theme Settings</DialogTitle>
-          <DialogDescription>
-            Customize the look and feel of your start page.
-          </DialogDescription>
+          <DialogTitle>{dialogTitle}</DialogTitle>
+          <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
+          <div>
+              <Label htmlFor="name">Name</Label>
+              <div className="flex items-center gap-2 mt-2">
+                <Input
+                    id="name"
+                    placeholder="Enter your name..."
+                    value={localName}
+                    onChange={(e) => setLocalName(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleNameSave();
+                        }
+                    }}
+                />
+                <Button onClick={handleNameSave}>Save</Button>
+              </div>
+          </div>
+
           <div>
             <Label className="text-sm font-medium">Appearance</Label>
             <RadioGroup

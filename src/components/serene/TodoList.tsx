@@ -12,7 +12,11 @@ import { PartyPopper } from 'lucide-react';
 
 const TASK_COLORS = ['#64B5F6', '#81C784', '#FFD54F', '#FF8A65', '#9575CD', '#F06292'];
 
-export function TodoList() {
+type TodoListProps = {
+  onTasksChange: (tasks: Task[]) => void;
+};
+
+export function TodoList({ onTasksChange }: TodoListProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const { toast } = useToast();
@@ -21,7 +25,9 @@ export function TodoList() {
     try {
       const storedTasks = localStorage.getItem('serene-tasks');
       if (storedTasks) {
-        setTasks(JSON.parse(storedTasks));
+        const parsedTasks = JSON.parse(storedTasks);
+        setTasks(parsedTasks);
+        onTasksChange(parsedTasks);
       }
     } catch (error) {
       console.error('Failed to load tasks from local storage', error);
@@ -31,13 +37,14 @@ export function TodoList() {
   useEffect(() => {
     try {
       localStorage.setItem('serene-tasks', JSON.stringify(tasks));
+      onTasksChange(tasks);
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('tasks-updated', { detail: { tasks } }));
       }
     } catch (error) {
       console.error('Failed to save tasks to local storage', error);
     }
-  }, [tasks]);
+  }, [tasks, onTasksChange]);
 
   const handleAddTask = (title: string, description?: string) => {
     const newTask: Task = {

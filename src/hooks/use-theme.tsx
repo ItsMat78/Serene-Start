@@ -68,12 +68,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   const setName = (newName: string) => {
+    const firstName = newName.trim().split(' ')[0];
     try {
-        localStorage.setItem('serene-name', newName);
+        localStorage.setItem('serene-name', firstName);
     } catch (e) {
         // Ignore localStorage errors
     }
-    setNameState(newName);
+    setNameState(firstName);
   };
   
   const value = useMemo(() => ({
