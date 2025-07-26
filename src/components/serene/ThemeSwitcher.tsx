@@ -37,12 +37,12 @@ export function ThemeSwitcherDialog({ open, onOpenChange }: ThemeSwitcherDialogP
     setWallpaperInput(customWallpaper);
   }, [customWallpaper]);
 
-  // If a user logs in, set the theme name to their display name
+  // If a user logs in, set the theme name to their display name if no name is already set
   useEffect(() => {
-    if (user?.displayName) {
+    if (user?.displayName && !name) {
       setName(user.displayName);
     }
-  }, [user, setName]);
+  }, [user, name, setName]);
 
   const handleApplyWallpaper = () => {
     setCustomWallpaper(wallpaperInput);
@@ -72,8 +72,11 @@ export function ThemeSwitcherDialog({ open, onOpenChange }: ThemeSwitcherDialogP
 
   const handleSignOut = async () => {
     await signOut(auth);
-    // Optionally, clear the local name as well
+    // Reset to default guest state
     setName('');
+    setTheme('dark');
+    setCustomWallpaper('');
+    setBackgroundDim(0.3);
   };
 
   // Determine dialog state based on auth and local name
@@ -92,16 +95,7 @@ export function ThemeSwitcherDialog({ open, onOpenChange }: ThemeSwitcherDialogP
           <span className="sr-only">Theme Settings</span>
         </Button>
       </DialogTrigger>
-       <DialogContent 
-        className="sm:max-w-[425px] border-0"
-        onInteractOutside={(e) => {
-            // Prevent closing by clicking outside during initial setup
-            if (isInitialSetup && open) {
-                e.preventDefault();
-            }
-        }}
-        hideCloseButton={isInitialSetup && open}
-       >
+       <DialogContent className="sm:max-w-[425px] border-0">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>

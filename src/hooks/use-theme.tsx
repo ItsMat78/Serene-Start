@@ -27,71 +27,76 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [name, setNameState] = useState<string>('');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
+  // Effect to load user data from the correct source (Firestore or localStorage)
   useEffect(() => {
     const loadUserSettings = async () => {
+      setIsDataLoaded(false); // Start loading
       if (user) {
-        // User is logged in. IGNORE localStorage. Load from Firestore.
+        // LOGGED IN: Ignore localStorage, load from Firestore.
         const userData = await getUserData(user.uid);
-        
-        // Set state from Firestore data, or use defaults if no data exists.
         setThemeState(userData?.theme || 'dark');
         setCustomWallpaperState(userData?.customWallpaper || '');
-        // Use nullish coalescing (??) to correctly handle a backgroundDim of 0
         setBackgroundDimState(userData?.backgroundDim ?? 0.3);
         setNameState(userData?.name || user.displayName?.split(' ')[0] || '');
-
       } else {
-        // User is logged out. Load settings from localStorage.
+        // LOGGED OUT: Load from localStorage.
         const storedTheme = localStorage.getItem('serene-theme') as Theme | null;
         const storedWallpaper = localStorage.getItem('serene-wallpaper');
         const storedDim = localStorage.getItem('serene-bg-dim');
         const storedName = localStorage.getItem('serene-name');
-        
-        // Set state from localStorage, or use defaults if no local data exists.
         setThemeState(storedTheme || 'dark');
         setCustomWallpaperState(storedWallpaper || '');
         setBackgroundDimState(storedDim ? parseFloat(storedDim) : 0.3);
         setNameState(storedName || '');
       }
-      setIsDataLoaded(true);
+      setIsDataLoaded(true); // Done loading
     };
 
     loadUserSettings();
   }, [user]);
 
+  // Effect to SAVE data automatically when it changes
+  useEffect(() => {
+    // Only save data if the user is logged in and the initial data load is complete.
+    // This prevents writing default values to the database on first load.
+    if (user && isDataLoaded) {
+      const settingsToSave = {
+        name,
+        theme,
+        customWallpaper,
+        backgroundDim,
+      };
+      saveUserData(user.uid, settingsToSave);
+    }
+  }, [user, name, theme, customWallpaper, backgroundDim, isDataLoaded]);
+
+
+  // State setters now only need to update the state. The `useEffect` above handles persistence.
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    if (user) {
-      saveUserData(user.uid, { theme: newTheme });
-    } else {
+    if (!user) {
       localStorage.setItem('serene-theme', newTheme);
     }
   };
   
   const setCustomWallpaper = (url: string) => {
     setCustomWallpaperState(url);
-    if (user) {
-      saveUserData(user.uid, { customWallpaper: url });
-    } else {
+    if (!user) {
       localStorage.setItem('serene-wallpaper', url);
     }
   };
 
   const setBackgroundDim = (dim: number) => {
     setBackgroundDimState(dim);
-    if (user) {
-      saveUserData(user.uid, { backgroundDim: dim });
-    } else {
+    if (!user) {
       localStorage.setItem('serene-bg-dim', dim.toString());
     }
-  }
+  };
 
   const setName = (newName: string) => {
     const firstName = newName.trim().split(' ')[0];
     setNameState(firstName);
-    if (user) {
-      saveUserData(user.uid, { name: firstName });
-    } else {
+    if (!user) {
       localStorage.setItem('serene-name', firstName);
     }
   };
