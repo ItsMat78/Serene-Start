@@ -5,6 +5,7 @@ import { useAuth } from './use-auth';
 import { saveUserData, getUserData } from '@/lib/firestore';
 import { Task } from '@/lib/types';
 
+// This will be the one true state for the application
 type AppState = {
   theme: 'light' | 'dark' | 'custom';
   customWallpaper: string;
@@ -41,19 +42,24 @@ const clearGuestData = () => {
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const { user, loading: authLoading } = useAuth(); // Use auth's loading state
+  const { user, loading: authLoading } = useAuth();
   const [state, setState] = useState<AppState>(GUEST_DEFAULT_STATE);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  // This state now tracks WHO the data belongs to ('guest', a user's UID, or null if loading)
+  const [dataOwner, setDataOwner] = useState<string | null>(null);
 
   // This useEffect handles LOADING data once auth state is confirmed.
   useEffect(() => {
     // Wait until Firebase has confirmed the user's auth status.
     if (authLoading) {
-      return; 
+      setDataOwner(null); // While auth is loading, we don't have a data owner
+      return;
     }
 
     const loadData = async () => {
-      setIsDataLoaded(false);
+      // Invalidate the data owner at the start of any data load.
+      // This prevents the saving logic from running with stale data.
+      setDataOwner(null); 
+
       if (user) {
         // --- USER IS LOGGED IN ---
         clearGuestData();
@@ -65,6 +71,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           name: userData?.name || user.displayName?.split(' ')[0] || GUEST_DEFAULT_STATE.name,
           tasks: userData?.tasks || GUEST_DEFAULT_STATE.tasks,
         });
+        // CRITICAL: Mark the data as belonging to the current user.
+        setDataOwner(user.uid);
       } else {
         // --- USER IS LOGGED OUT / GUEST ---
         const storedTasks = localStorage.getItem('serene-tasks');
@@ -84,53 +92,59 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         } else {
             setState(GUEST_DEFAULT_STATE);
         }
+        // CRITICAL: Mark the data as belonging to a guest.
+        setDataOwner('guest');
       }
-      setIsDataLoaded(true);
     };
 
     loadData();
-  }, [user, authLoading]); // Depend on authLoading
+  }, [user, authLoading]);
 
   // This useEffect handles SAVING data whenever the state changes.
   useEffect(() => {
-    // Only save after the initial load is complete and auth is resolved.
-    if (!isDataLoaded || authLoading) return;
+    // Do not save if we don't know who the data belongs to.
+    if (!dataOwner) return;
 
-    if (user) {
+    if (user && dataOwner === user.uid) {
+      // Only save to Firestore if the user is logged in AND the data belongs to them.
       saveUserData(user.uid, state);
-    } else {
+    } else if (!user && dataOwner === 'guest') {
+      // Only save to localStorage if there is no user AND the data belongs to a guest.
       localStorage.setItem('serene-theme', state.theme);
       localStorage.setItem('serene-wallpaper', state.customWallpaper);
       localStorage.setItem('serene-bg-dim', state.backgroundDim.toString());
       localStorage.setItem('serene-name', state.name);
       localStorage.setItem('serene-tasks', JSON.stringify(state.tasks));
     }
-  }, [state, user, isDataLoaded, authLoading]);
+  }, [state, user, dataOwner]); // Depends on `dataOwner` to prevent race conditions.
 
-    // This useEffect handles applying the theme to the body.
-    useEffect(() => {
-        const root = window.document.documentElement;
-        root.classList.remove('light', 'dark', 'custom');
-        
-        const body = window.document.body;
-        body.style.backgroundImage = '';
-        
-        if (state.theme === 'custom' && state.customWallpaper) {
-            root.classList.add('custom', 'dark');
-            body.style.backgroundImage = `linear-gradient(rgba(0,0,0,${state.backgroundDim}), rgba(0,0,0,${state.backgroundDim})), url('${state.customWallpaper}')`;
-            body.style.backgroundSize = 'cover';
-            body.style.backgroundPosition = 'center';
-            body.style.backgroundAttachment = 'fixed';
-        } else {
-            root.classList.add(state.theme);
-        }
-    }, [state.theme, state.customWallpaper, state.backgroundDim]);
+  // This useEffect handles applying the theme to the body.
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark', 'custom');
+    
+    const body = window.document.body;
+    body.style.backgroundImage = '';
+    
+    if (state.theme === 'custom' && state.customWallpaper) {
+        root.classList.add('custom', 'dark');
+        body.style.backgroundImage = `linear-gradient(rgba(0,0,0,${state.backgroundDim}), rgba(0,0,0,${state.backgroundDim})), url('${state.customWallpaper}')`;
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+        body.style.backgroundAttachment = 'fixed';
+    } else {
+        root.classList.add(state.theme);
+    }
+  }, [state.theme, state.customWallpaper, state.backgroundDim]);
 
   const setTheme = (theme: AppState['theme']) => setState(s => ({ ...s, theme }));
   const setCustomWallpaper = (url: string) => setState(s => ({ ...s, customWallpaper: url }));
   const setBackgroundDim = (dim: number) => setState(s => ({ ...s, backgroundDim: dim }));
   const setName = (name: string) => setState(s => ({ ...s, name: name.trim().split(' ')[0] }));
   const setTasks = (tasks: Task[]) => setState(s => ({ ...s, tasks }));
+
+  // isDataLoaded is now simpler: it's true when we have a confirmed data owner.
+  const isDataLoaded = dataOwner !== null;
 
   const contextValue = useMemo(() => ({
     ...state,
