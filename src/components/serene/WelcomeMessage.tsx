@@ -124,26 +124,26 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-3">
         <h1 className="text-4xl md:text-5xl font-bold text-foreground/90 tracking-tight transition-all duration-500 animate-in fade-in">
           {message}
         </h1>
-        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-          <Button onClick={handlePlaySpeech} variant="ghost" size="icon" className="size-11" disabled={isSpeaking}>
-            {isSpeaking ? (
-                <Loader className="animate-spin" />
-            ) : (
-                <Volume2 className="size-6" />
-            )}
-            <span className="sr-only">Play greeting</span>
-          </Button>
-        </motion.div>
-      </div>
 
         {focus && (
-            <p className="text-lg text-muted-foreground transition-all duration-500 animate-in fade-in delay-100">
-                {focus}
-            </p>
+            <div className="flex items-center gap-3">
+                <p className="text-lg text-muted-foreground transition-all duration-500 animate-in fade-in delay-100">
+                    {focus}
+                </p>
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                  <Button onClick={handlePlaySpeech} variant="ghost" size="icon" className="size-11" disabled={isSpeaking}>
+                    {isSpeaking ? (
+                        <Loader className="animate-spin" />
+                    ) : (
+                        <Volume2 className="size-6" />
+                    )}
+                    <span className="sr-only">Play greeting</span>
+                  </Button>
+                </motion.div>
+            </div>
         )}
         {speechError && (
              <p className="text-sm text-destructive flex items-center gap-2">
