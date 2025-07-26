@@ -35,7 +35,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         if (userData) {
           setThemeState(userData.theme || 'dark');
           setCustomWallpaperState(userData.customWallpaper || '');
-          setBackgroundDimState(userData.backgroundDim || 0.3);
+          setBackgroundDimState(userData.backgroundDim ?? 0.3);
           setNameState(userData.name || user.displayName?.split(' ')[0] || '');
         } else {
           // No data in Firestore, set name from user profile
@@ -62,7 +62,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     if (user) {
-      saveUserData(user.uid, { theme: newTheme, customWallpaper, backgroundDim, name });
+      saveUserData(user.uid, { theme: newTheme });
     } else {
       localStorage.setItem('serene-theme', newTheme);
     }
@@ -71,7 +71,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setCustomWallpaper = (url: string) => {
     setCustomWallpaperState(url);
     if (user) {
-      saveUserData(user.uid, { customWallpaper: url, theme, backgroundDim, name });
+      saveUserData(user.uid, { customWallpaper: url });
     } else {
       localStorage.setItem('serene-wallpaper', url);
     }
@@ -80,7 +80,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setBackgroundDim = (dim: number) => {
     setBackgroundDimState(dim);
     if (user) {
-      saveUserData(user.uid, { backgroundDim: dim, theme, customWallpaper, name });
+      saveUserData(user.uid, { backgroundDim: dim });
     } else {
       localStorage.setItem('serene-bg-dim', dim.toString());
     }
@@ -90,7 +90,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const firstName = newName.trim().split(' ')[0];
     setNameState(firstName);
     if (user) {
-      saveUserData(user.uid, { name: firstName, theme, customWallpaper, backgroundDim });
+      saveUserData(user.uid, { name: firstName });
     } else {
       localStorage.setItem('serene-name', firstName);
     }

@@ -18,7 +18,7 @@ const WelcomeMessageInputSchema = z.object({
   tasks: z.array(z.object({
     title: z.string(),
     description: z.string().optional(),
-  })).describe('A list of the user\'s current ongoing tasks, including their titles and descriptions.'),
+  })).describe('A list of the users current ongoing tasks, including their titles and descriptions.'),
 });
 export type WelcomeMessageInput = z.infer<typeof WelcomeMessageInputSchema>;
 
@@ -36,7 +36,7 @@ const prompt = ai.definePrompt({
   name: 'welcomeMessagePrompt',
   input: {schema: WelcomeMessageInputSchema},
   output: {schema: WelcomeMessageOutputSchema},
-  prompt: `You are a helpful and motivating assistant. Your goal is to generate a personalized and creative welcome message for a user's start page. Avoid generic or repetitive phrases.
+  prompt: `You are a strict yet motivating assistant, like a teacher who pushes their students to be their best. Your goal is to generate a personalized and critical welcome message for a user's start page. Avoid generic or overly encouraging phrases. Be direct and to the point.
 
   Your response MUST be based on the following information:
   - User's name: {{#if name}}{{{name}}}{{else}}your user{{/if}}
@@ -52,8 +52,8 @@ const prompt = ai.definePrompt({
   {{/if}}
 
   Here's your task:
-  1.  **Generate a Welcome Message**: Create a short, engaging, and relevant welcome message. Address the user by name if it's provided. It should be positive, encouraging, and feel spontaneous. For example, instead of "Good morning!", try something like "Rise and shine, Shreyash! A fresh morning for new opportunities." or "Hope you had a great day so far!".
-  2.  **Generate a Focus Suggestion**: Based on their tasks (including descriptions), provide a brief, specific suggestion for what they could focus on. When suggesting a task, also offer a creative or strategic way to approach it. For instance, instead of just listing the task, you could say "That 'Design new landing page' task looks like a great creative challenge. Maybe start with the wireframe, or gather some inspiration first?". If there are no tasks, provide a general motivating sentence about starting something new or enjoying the quiet moment.
+  1.  **Generate a Welcome Message**: Create a short, direct, and thought-provoking welcome message. Address the user by name if it's provided. It should be critical but fair, designed to motivate the user to be productive. For example, instead of "Good morning!", try something like "Alright, Shreyash, let's see some real progress today." or "Another day, another opportunity to do something meaningful. Don't waste it.".
+  2.  **Generate a Focus Suggestion**: Based on their tasks (including descriptions), provide a brief, specific suggestion for what they should focus on. Be direct and challenging. For instance, instead of just listing the task, you could say "'That 'Design new landing page' task won't design itself. Start with the wireframe, and let's see a draft by the end of the day.". If there are no tasks, provide a general motivating sentence about avoiding procrastination, like "An empty list is a sign of either true completion or true procrastination. I hope it's the former.".
   
   **IMPORTANT RULE**: Only use the user's name in the 'message' field. DO NOT include their name in the 'focus' field.
 
