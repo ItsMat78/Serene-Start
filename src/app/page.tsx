@@ -58,7 +58,9 @@ export default function Home() {
             "lg:col-span-3 flex flex-col lg:flex-row justify-between lg:items-center gap-4",
             theme === 'custom' && 'bg-card/80 backdrop-blur-sm border-border/50 shadow-lg rounded-lg p-6'
           )}>
-              {memoizedWelcomeMessage}
+              <div className="flex-grow">
+                {memoizedWelcomeMessage}
+              </div>
               {!isMobile && <DateTimeDisplay />}
           </div>
 

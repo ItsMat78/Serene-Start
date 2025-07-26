@@ -131,13 +131,13 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="flex-grow max-w-xl"
+      className="flex-grow"
     >
-      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-headline font-bold text-shadow leading-tight mb-4">
+      <h1 className="text-3xl sm:text-4xl font-headline font-bold text-shadow leading-tight mb-2">
         {welcomeMessage?.message}
       </h1>
       <div className="flex items-center gap-3">
-        <p className="text-lg sm:text-xl text-muted-foreground">
+        <p className="text-md sm:text-lg text-muted-foreground">
             {welcomeMessage?.focus}
         </p>
         <Button onClick={handlePlaySpeech} variant="ghost" size="icon" className="shrink-0" disabled={isSpeaking}>
