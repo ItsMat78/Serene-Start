@@ -53,7 +53,7 @@ const prompt = ai.definePrompt({
 
   Here's your task:
   1.  **Generate a Welcome Message**: Create a short, engaging, and relevant welcome message. Address the user by name if it's provided. It should be positive, encouraging, and feel spontaneous. For example, instead of "Good morning!", try something like "Rise and shine, Shreyash! A fresh morning for new opportunities." or "Hope you had a great day so far!".
-  2.  **Generate a Focus Suggestion**: Based on their tasks (including descriptions), provide a brief, specific suggestion for what they could focus on. If there are no tasks, provide a general motivating sentence about starting something new or enjoying the quiet moment. For instance, instead of just listing the task, you could say "That 'Design new landing page' task looks like a great creative challenge to jump into."
+  2.  **Generate a Focus Suggestion**: Based on their tasks (including descriptions), provide a brief, specific suggestion for what they could focus on. When suggesting a task, also offer a creative or strategic way to approach it. For instance, instead of just listing the task, you could say "That 'Design new landing page' task looks like a great creative challenge. Maybe start with the wireframe, or gather some inspiration first?". If there are no tasks, provide a general motivating sentence about starting something new or enjoying the quiet moment.
   
   **IMPORTANT RULE**: Only use the user's name in the 'message' field. DO NOT include their name in the 'focus' field.
 
