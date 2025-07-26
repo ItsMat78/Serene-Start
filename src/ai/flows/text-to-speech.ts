@@ -56,12 +56,12 @@ const textToSpeechFlow = ai.defineFlow(
   },
   async (text) => {
     const { media } = await ai.generate({
-      model: googleAI.model('gemini-2.5-flash-preview-tts'),
+      model: googleAI.model('gemini-2.5-pro-preview-tts'),
       config: {
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Algenib' }, // A standard female voice
+            prebuiltVoiceConfig: { voiceName: 'Achernar' }, // A standard female voice
           },
         },
       },

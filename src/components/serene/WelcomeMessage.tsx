@@ -80,9 +80,10 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
 
     setIsSpeaking(true);
     setSpeechError(null);
+    const fullMessage = `${message}. ${focus || ''}`;
 
     try {
-      const result = await getGreetingSpeechAction(message);
+      const result = await getGreetingSpeechAction(fullMessage);
       if (result.audio) {
         if (audioRef.current) {
           audioRef.current.src = result.audio;
