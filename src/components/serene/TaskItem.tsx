@@ -5,8 +5,9 @@ import type { Task } from '@/lib/types';
 import { motion } from 'framer-motion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Trash2, Edit, Save, X, AlertTriangle } from 'lucide-react';
-import { RenderWithLinks } from './RenderWithLinks';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Edit, Save, X, AlertTriangle, Link as LinkIcon } from 'lucide-react';
+import { extractLinks, removeLinks } from '@/lib/utils';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import {
@@ -21,6 +22,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { cn } from '@/lib/utils';
 
 type TaskItemProps = {
@@ -34,6 +36,9 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description || '');
+
+  const links = extractLinks(task.description || '');
+  const descriptionText = removeLinks(task.description || '');
 
   const handleSave = () => {
     if (editedTitle.trim()) {
@@ -125,8 +130,8 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
               />
             ) : (
               <div className="text-muted-foreground text-base prose prose-sm prose-p:my-0 prose-a:text-primary max-w-none">
-                {task.description ? (
-                  <RenderWithLinks text={task.description} />
+                {descriptionText ? (
+                   <p>{descriptionText}</p>
                 ) : (
                   <p className="italic">No details.</p>
                 )}
@@ -134,7 +139,26 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
             )}
           </div>
         </CardContent>
-        <CardFooter className="p-2 pt-0 justify-end mt-auto">
+        <CardFooter className="p-2 pt-0 justify-between items-end mt-auto">
+           <div className="flex flex-wrap gap-2">
+            <TooltipProvider>
+             {links.map((link, index) => (
+                <Tooltip key={index}>
+                  <TooltipTrigger asChild>
+                    <a href={link.href} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                      <Badge variant="secondary" className="hover:bg-accent transition-colors">
+                        <LinkIcon className="size-3 mr-1.5" />
+                         {link.title.length > 20 ? `${link.title.substring(0, 20)}...` : link.title}
+                      </Badge>
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{link.href}</p>
+                  </TooltipContent>
+                </Tooltip>
+             ))}
+            </TooltipProvider>
+           </div>
           <div className="flex items-center gap-1">
             {isEditing ? (
               <>
