@@ -36,7 +36,7 @@ export function PomodoroTimer() {
   }, [isActive, time]);
   
   useEffect(() => {
-    document.title = `${formatTime(time)} - Serene Start`;
+    document.title = `${formatTime(time)} - Serenity Start`;
   }, [time]);
 
   const toggleTimer = () => {

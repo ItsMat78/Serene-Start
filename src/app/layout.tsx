@@ -6,7 +6,7 @@ import { AppProvider } from '@/hooks/use-theme';
 import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
-  title: 'Serene Start',
+  title: 'Serenity Start',
   description: 'A personalized start page for focus and productivity.',
 };
 
