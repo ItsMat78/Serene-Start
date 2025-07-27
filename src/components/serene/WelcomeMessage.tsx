@@ -7,7 +7,7 @@ import type { Task } from '@/lib/types';
 import { Button } from '../ui/button';
 import { Volume2, Loader, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useAppContext } from '@/hooks/use-theme'; // Use the new central context
+import { useAppContext } from '@/hooks/use-theme';
 
 type CachedMessage = {
   message: string;
@@ -19,14 +19,41 @@ type WelcomeMessageProps = {
   tasks: Task[];
 };
 
+const getGreetingContext = (date: Date) => {
+  let hours = date.getHours();
+  let day = date.getDay();
+
+  if (hours >= 0 && hours < 5) {
+    day = (day - 1 + 7) % 7;
+  }
+
+  const timeOfDay = (hours: number): string => {
+    if (hours >= 5 && hours < 12) return 'morning';
+    if (hours >= 12 && hours < 17) return 'afternoon';
+    if (hours >= 17 && hours < 21) return 'evening';
+    return 'night';
+  };
+
+  const dayOfWeek = (day: number): string => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[day];
+  };
+
+  return {
+    timeOfDay: timeOfDay(hours),
+    dayOfWeek: dayOfWeek(day),
+  };
+};
+
 export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
-  // Pull the user's name from the central context.
-  const { name } = useAppContext(); 
+  const { name } = useAppContext();
   const [welcomeMessage, setWelcomeMessage] = useState<CachedMessage | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const taskStateIdentifier = JSON.stringify(tasks.map(t => ({ id: t.id, title: t.title, description: t.description })));
 
   useEffect(() => {
     const fetchWelcomeMessage = async () => {
@@ -34,12 +61,9 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
       setError(null);
       try {
         const currentTime = new Date();
-        const timeOfDay = getTimeOfDay(currentTime.getHours());
-        const dayOfWeek = getDayOfWeek(currentTime.getDay());
-        
-        // Use a simpler cache key that changes when tasks or user name change.
-        const tasksIdentifier = tasks.map(t => t.id).join(',');
-        const cacheKey = `welcomeMessage:${name}:${tasksIdentifier}`;
+        const { timeOfDay, dayOfWeek } = getGreetingContext(currentTime);
+
+        const cacheKey = `welcomeMessage:${name}:${taskStateIdentifier}`;
         const cached = localStorage.getItem(cacheKey);
 
         if (cached) {
@@ -69,7 +93,6 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
       } catch (err) {
         console.error('Error fetching welcome message:', err);
         setError('Could not load greeting. Please try again later.');
-        // Set a default message on error
         setWelcomeMessage({ message: `Let's get to work, ${name || 'friend'}.`, focus: 'What is our first objective?', timestamp: Date.now() });
       } finally {
         setIsLoading(false);
@@ -77,7 +100,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
     };
 
     fetchWelcomeMessage();
-  }, [name, tasks]);
+  }, [name, taskStateIdentifier]);
 
   const handlePlaySpeech = async () => {
     if (!welcomeMessage?.message || isSpeaking) return;
@@ -88,7 +111,6 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
 
     try {
       const result = await getGreetingSpeechAction(fullMessage);
-      // CORRECTED: Check for result.audio and assign result.audio to the src
       if (result && result.audio && audioRef.current) {
         audioRef.current.src = result.audio;
         audioRef.current.play();
@@ -101,8 +123,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
       setIsSpeaking(false);
     }
   };
-  
-  // Setup audio element and its event listeners once.
+
   useEffect(() => {
     const audio = new Audio();
     audioRef.current = audio;
@@ -113,9 +134,8 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
       audio.removeEventListener('ended', handleEnded);
       audio.pause();
       audioRef.current = null;
-    }
+    };
   }, []);
-
 
   if (isLoading) {
     return (
@@ -127,7 +147,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
   }
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -138,30 +158,18 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
       </h1>
       <div className="flex items-center gap-3">
         <p className="text-md sm:text-lg text-muted-foreground">
-            {welcomeMessage?.focus}
+          {welcomeMessage?.focus}
         </p>
         <Button onClick={handlePlaySpeech} variant="ghost" size="icon" className="shrink-0" disabled={isSpeaking}>
-            {isSpeaking ? <Loader className="animate-spin" /> : <Volume2 />}
-            <span className="sr-only">Listen to greeting</span>
+          {isSpeaking ? <Loader className="animate-spin" /> : <Volume2 />}
+          <span className="sr-only">Listen to greeting</span>
         </Button>
       </div>
       {error && (
         <p className="text-sm text-destructive mt-2 flex items-center gap-2">
-            <AlertTriangle className="size-4" /> {error}
+          <AlertTriangle className="size-4" /> {error}
         </p>
       )}
     </motion.div>
   );
 }
-
-const getTimeOfDay = (hours: number): string => {
-  if (hours >= 5 && hours < 12) return 'morning';
-  if (hours >= 12 && hours < 17) return 'afternoon';
-  if (hours >= 17 && hours < 21) return 'evening';
-  return 'night';
-};
-
-const getDayOfWeek = (day: number): string => {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  return days[day];
-};
