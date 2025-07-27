@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Edit, Save, X, AlertTriangle, Link as LinkIcon } from 'lucide-react';
+import { Trash2, Edit, Save, X, AlertTriangle, Link as LinkIcon, CheckCircle } from 'lucide-react';
 import { extractLinks, removeLinks } from '@/lib/utils';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
@@ -87,38 +87,52 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
               </CardTitle>
             )}
           </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Checkbox
-                id={`task-${task.id}`}
-                checked={task.completed}
-                className="size-6 rounded-md border-primary/50 data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground mt-1"
-                aria-label={`Mark ${task.title} as ${task.completed ? 'incomplete' : 'complete'}`}
-              />
-            </AlertDialogTrigger>
-            {!task.completed && (
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center gap-2">
-                    <AlertTriangle className="text-accent" />
-                    Complete Task?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to mark "{task.title}" as complete?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => onToggle(task.id)}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                  >
-                    Complete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            )}
-          </AlertDialog>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`size-8 transition-colors ${
+                        task.completed
+                          ? 'bg-accent/80 text-accent-foreground'
+                          : 'hover:bg-accent/80'
+                      }`}
+                    >
+                      <CheckCircle className="size-5" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  {!task.completed && (
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                          <AlertTriangle className="text-accent" />
+                          Complete Task?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to mark "{task.title}" as complete?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => onToggle(task.id)}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                        >
+                          Complete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  )}
+                </AlertDialog>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Finished?</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardHeader>
         <CardContent className="p-4 pt-0 flex-grow">
           <div className="space-y-2">
@@ -131,7 +145,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
             ) : (
               <div className="text-muted-foreground text-base prose prose-sm prose-p:my-0 prose-a:text-primary max-w-none">
                 {descriptionText ? (
-                   <p>{descriptionText}</p>
+                  <p>{descriptionText}</p>
                 ) : (
                   <p className="italic">No details.</p>
                 )}
@@ -140,15 +154,25 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
           </div>
         </CardContent>
         <CardFooter className="p-2 pt-0 justify-between items-end mt-auto">
-           <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             <TooltipProvider>
-             {links.map((link, index) => (
+              {links.map((link, index) => (
                 <Tooltip key={index}>
                   <TooltipTrigger asChild>
-                    <a href={link.href} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                      <Badge variant="secondary" className="hover:bg-accent transition-colors">
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Badge
+                        variant="secondary"
+                        className="hover:bg-accent transition-colors"
+                      >
                         <LinkIcon className="size-3 mr-1.5" />
-                         {link.title.length > 20 ? `${link.title.substring(0, 20)}...` : link.title}
+                        {link.title.length > 20
+                          ? `${link.title.substring(0, 20)}...`
+                          : link.title}
                       </Badge>
                     </a>
                   </TooltipTrigger>
@@ -156,9 +180,9 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
                     <p>{link.href}</p>
                   </TooltipContent>
                 </Tooltip>
-             ))}
+              ))}
             </TooltipProvider>
-           </div>
+          </div>
           <div className="flex items-center gap-1">
             {isEditing ? (
               <>
@@ -169,34 +193,50 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
-                     <AlertDialogHeader>
-                       <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                       <AlertDialogDescription>
-                         This action cannot be undone. This will permanently delete the task "{task.title}".
-                       </AlertDialogDescription>
-                     </AlertDialogHeader>
-                     <AlertDialogFooter>
-                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                       <AlertDialogAction
-                         onClick={() => onDelete(task.id)}
-                         className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                       >
-                         Delete
-                       </AlertDialogAction>
-                     </AlertDialogFooter>
-                   </AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the
+                        task "{task.title}".
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => onDelete(task.id)}
+                        className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
                 </AlertDialog>
-                <Button variant="ghost" size="icon" className="size-8" onClick={handleSave}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={handleSave}
+                >
                   <Save className="size-4 text-accent" />
                 </Button>
-                <Button variant="ghost" size="icon" className="size-8" onClick={handleCancel}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={handleCancel}
+                >
                   <X className="size-4" />
                 </Button>
               </>
             ) : (
               <>
                 {!task.completed && (
-                  <Button variant="ghost" size="icon" className="size-8 opacity-60 hover:opacity-100" onClick={() => setIsEditing(true)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 opacity-60 hover:opacity-100"
+                    onClick={() => setIsEditing(true)}
+                  >
                     <Edit className="size-4" />
                   </Button>
                 )}

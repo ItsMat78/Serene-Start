@@ -10,7 +10,7 @@ export type Link = {
   href: string;
 };
 
-const urlRegex = /((https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(www\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|([A-Z0-9.-]+\.[A-Z]{2,})/gi;
+const urlRegex = /((https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|(www\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])|([A-Z0-9.-]+\.[A-Z]{2,})/gi;
 
 // Improved link extractor
 export const extractLinks = (text: string): Link[] => {
