@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Interactive } from './Interactive';
 
 export function DateTimeDisplay() {
   const [date, setDate] = useState<Date | null>(null);
@@ -25,9 +26,11 @@ export function DateTimeDisplay() {
   const dayAndMonth = date.toLocaleDateString('en-US', { day: 'numeric', month: 'long' });
 
   return (
-    <div className="text-right flex-shrink-0 w-full lg:w-72">
-      <p className="text-4xl md:text-5xl font-bold text-foreground/90 tabular-nums">{time}</p>
-      <p className="text-lg text-muted-foreground">{day}, {dayAndMonth}</p>
-    </div>
+    <Interactive>
+      <div className="text-right flex-shrink-0 w-full lg:w-72">
+        <p className="text-4xl md:text-5xl font-bold text-foreground/90 tabular-nums">{time}</p>
+        <p className="text-lg text-muted-foreground">{day}, {dayAndMonth}</p>
+      </div>
+    </Interactive>
   );
 }

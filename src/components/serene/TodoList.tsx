@@ -10,6 +10,7 @@ import { Confetti } from './Confetti';
 import { useToast } from '@/hooks/use-toast';
 import { PartyPopper } from 'lucide-react';
 import { useAppContext } from '@/hooks/use-theme'; // Use the new central context
+import { Interactive } from './Interactive';
 
 const TASK_COLORS = ['#64B5F6', '#81C784', '#FFD54F', '#FF8A65', '#9575CD', '#F06292'];
 
@@ -82,60 +83,62 @@ export function TodoList() {
   const completedTasks = tasks.filter((task) => task.completed);
 
   return (
-    <div className="relative space-y-10">
-      {showConfetti && <Confetti />}
+    <Interactive>
+      <div className="relative space-y-10">
+        {showConfetti && <Confetti />}
 
-      <motion.div layout className="space-y-10">
-        <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg overflow-hidden">
-          <CardContent className="p-6">
-            <div className="pb-4">
-              <AddTaskForm onAddTask={handleAddTask} />
-            </div>
-            {ongoingTasks.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                <AnimatePresence>
-                  {ongoingTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      onToggle={handleToggleTask}
-                      onDelete={handleDeleteTask}
-                      onUpdate={handleUpdateTask}
-                    />
-                  ))}
-                </AnimatePresence>
+        <motion.div layout className="space-y-10">
+          <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg overflow-hidden">
+            <CardContent className="p-6">
+              <div className="pb-4">
+                <AddTaskForm onAddTask={handleAddTask} />
               </div>
-            ) : (
-              <p className="text-muted-foreground p-4 text-center">
-                Nothing to do! Add a task above.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {completedTasks.length > 0 && (
-          <Card className="bg-card/60 backdrop-blur-sm border-border/30 shadow-lg">
-            <CardHeader>
-              <CardTitle className="font-headline text-2xl text-shadow">Completed</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                <AnimatePresence>
-                  {completedTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      onToggle={handleToggleTask}
-                      onDelete={handleDeleteTask}
-                      onUpdate={handleUpdateTask}
-                    />
-                  ))}
-                </AnimatePresence>
-              </div>
+              {ongoingTasks.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <AnimatePresence>
+                    {ongoingTasks.map((task) => (
+                      <TaskItem
+                        key={task.id}
+                        task={task}
+                        onToggle={handleToggleTask}
+                        onDelete={handleDeleteTask}
+                        onUpdate={handleUpdateTask}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <p className="text-muted-foreground p-4 text-center">
+                  Nothing to do! Add a task above.
+                </p>
+              )}
             </CardContent>
           </Card>
-        )}
-      </motion.div>
-    </div>
+
+          {completedTasks.length > 0 && (
+            <Card className="bg-card/60 backdrop-blur-sm border-border/30 shadow-lg">
+              <CardHeader>
+                <CardTitle className="font-headline text-2xl text-shadow">Completed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <AnimatePresence>
+                    {completedTasks.map((task) => (
+                      <TaskItem
+                        key={task.id}
+                        task={task}
+                        onToggle={handleToggleTask}
+                        onDelete={handleDeleteTask}
+                        onUpdate={handleUpdateTask}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </motion.div>
+      </div>
+    </Interactive>
   );
 }

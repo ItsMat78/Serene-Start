@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { Volume2, Loader, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '@/hooks/use-theme';
+import { Interactive } from './Interactive';
 
 type CachedMessage = {
   message: string;
@@ -147,29 +148,31 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="flex-grow"
-    >
-      <h1 className="text-3xl sm:text-4xl font-headline font-bold text-shadow leading-tight mb-2">
-        {welcomeMessage?.message}
-      </h1>
-      <div className="flex items-center gap-3">
-        <p className="text-md sm:text-lg text-muted-foreground">
-          {welcomeMessage?.focus}
-        </p>
-        <Button onClick={handlePlaySpeech} variant="ghost" size="icon" className="shrink-0" disabled={isSpeaking}>
-          {isSpeaking ? <Loader className="animate-spin" /> : <Volume2 />}
-          <span className="sr-only">Listen to greeting</span>
-        </Button>
-      </div>
-      {error && (
-        <p className="text-sm text-destructive mt-2 flex items-center gap-2">
-          <AlertTriangle className="size-4" /> {error}
-        </p>
-      )}
-    </motion.div>
+    <Interactive>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex-grow"
+      >
+        <h1 className="text-3xl sm:text-4xl font-headline font-bold text-shadow leading-tight mb-2">
+          {welcomeMessage?.message}
+        </h1>
+        <div className="flex items-center gap-3">
+          <p className="text-md sm:text-lg text-muted-foreground">
+            {welcomeMessage?.focus}
+          </p>
+          <Button onClick={handlePlaySpeech} variant="ghost" size="icon" className="shrink-0" disabled={isSpeaking}>
+            {isSpeaking ? <Loader className="animate-spin" /> : <Volume2 />}
+            <span className="sr-only">Listen to greeting</span>
+          </Button>
+        </div>
+        {error && (
+          <p className="text-sm text-destructive mt-2 flex items-center gap-2">
+            <AlertTriangle className="size-4" /> {error}
+          </p>
+        )}
+      </motion.div>
+    </Interactive>
   );
 }
