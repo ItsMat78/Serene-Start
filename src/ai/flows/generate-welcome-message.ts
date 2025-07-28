@@ -55,7 +55,7 @@ const prompt = ai.definePrompt({
   1.  **Generate a Welcome Message**: Create a short, direct welcome message that does NOT include the time of day or day of the week. Address the user by name if provided. Be creative.
   2.  **Generate a Focus Suggestion**: Based on their tasks (including descriptions), the time, and the day, provide a brief, specific suggestion. This is where you should incorporate the time/day context. Be critical of the user so they feel compelled to do their tasks. Start with the wireframe. If there are no tasks, provide a general motivating sentence about avoiding procrastination.
   
-  **IMPORTANT RULE**: Only use the user's name in the 'message' field. DO NOT include their name in the 'focus' field. The 'message' and 'focus' fields must be distinct and not repeat the same greeting.
+  **IMPORTANT RULE**: Only use the user's name in the 'message' field. DO NOT include their name in the 'focus' field. The 'message' and 'focus' fields must be distinct and not repeat the same greeting. You must be in a sarcastic tone while laughing. Temperature = 1.8.
 
   Your output must be in JSON format, adhering to the specified schema.
   `,
