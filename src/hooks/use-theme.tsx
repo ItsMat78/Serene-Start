@@ -26,8 +26,8 @@ type AppContextState = AppState & {
 const AppContext = createContext<AppContextState | undefined>(undefined);
 
 const GUEST_DEFAULT_STATE: AppState = {
-    theme: 'dark',
-    customWallpaper: '',
+    theme: 'custom',
+    customWallpaper: 'https://images.unsplash.com/photo-1752035682080-6ef2359189ea?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     backgroundDim: 0.3,
     name: '',
     tasks: [],
