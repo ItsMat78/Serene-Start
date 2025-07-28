@@ -23,6 +23,16 @@ export async function getGreetingSpeechAction(message: string) {
         return result;
     } catch (error) {
         console.error('Failed to generate speech:', error);
-        return { audio: null };
+        return { audio: '' };
     }
+}
+
+export async function getAlarmSpeechAction() {
+  try {
+    const result = await textToSpeech("Time's up! Take a break.");
+    return result;
+  } catch (error) {
+    console.error('Failed to generate alarm speech:', error);
+    return { audio: '' };
+  }
 }

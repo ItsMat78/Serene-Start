@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Play, Pause, RotateCcw, Coffee, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getAlarmSpeechAction } from '@/app/actions';
 
 const PRESETS = {
   pomodoro: 25 * 60,
@@ -19,6 +20,7 @@ export function PomodoroTimer() {
   const [mode, setMode] = useState<Mode>('pomodoro');
   const [time, setTime] = useState(PRESETS[mode]);
   const [isActive, setIsActive] = useState(false);
+  const [isGeneratingSpeech, setIsGeneratingSpeech] = useState(false);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -28,12 +30,21 @@ export function PomodoroTimer() {
       }, 1000);
     } else if (isActive && time === 0) {
       setIsActive(false);
-      // Here you could add a notification or sound
+      if (!isGeneratingSpeech) {
+        setIsGeneratingSpeech(true);
+        getAlarmSpeechAction().then(({ audio }) => {
+          if (audio) {
+            const alarm = new Audio(audio);
+            alarm.play();
+          }
+          setIsGeneratingSpeech(false);
+        });
+      }
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, time]);
+  }, [isActive, time, isGeneratingSpeech]);
   
   useEffect(() => {
     document.title = `${formatTime(time)} - Serenity Start`;
