@@ -61,7 +61,7 @@ const textToSpeechFlow = ai.defineFlow(
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Achernar' }, // A standard female voice
+            prebuiltVoiceConfig: { voiceName: 'Laomedeia' }, // A standard female voice
           },
         },
       },
