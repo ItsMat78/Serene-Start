@@ -64,15 +64,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // --- USER IS LOGGED IN ---
         clearGuestData();
         const userData = await getUserData(user.uid);
-        setState({
-          theme: userData?.theme || GUEST_DEFAULT_STATE.theme,
-          customWallpaper: userData?.customWallpaper || GUEST_DEFAULT_STATE.customWallpaper,
-          backgroundDim: userData?.backgroundDim ?? GUEST_DEFAULT_STATE.backgroundDim,
-          name: userData?.name || user.displayName?.split(' ')[0] || GUEST_DEFAULT_STATE.name,
-          tasks: userData?.tasks || GUEST_DEFAULT_STATE.tasks,
-        });
-        // CRITICAL: Mark the data as belonging to the current user.
-        setDataOwner(user.uid);
+        
+        // FIX: Only update state if we successfully fetched data.
+        // If userData is null (due to a network error or no data), we don't
+        // want to overwrite the current state with defaults, which would then
+        // trigger a save and wipe the user's data.
+        if (userData) {
+            setState({
+                theme: userData.theme || GUEST_DEFAULT_STATE.theme,
+                customWallpaper: userData.customWallpaper || GUEST_DEFAULT_STATE.customWallpaper,
+                backgroundDim: userData.backgroundDim ?? GUEST_DEFAULT_STATE.backgroundDim,
+                name: userData.name || user.displayName?.split(' ')[0] || GUEST_DEFAULT_STATE.name,
+                tasks: userData.tasks || GUEST_DEFAULT_STATE.tasks,
+            });
+            // CRITICAL: Mark the data as belonging to the current user ONLY after a successful load.
+            setDataOwner(user.uid);
+        }
+        // If userData is null, we do nothing. The UI will continue to show
+        // whatever state it had (or the loading state if `isDataLoaded` is used)
+        // until a connection is established and data is loaded successfully.
+
       } else {
         // --- USER IS LOGGED OUT / GUEST ---
         const storedTasks = localStorage.getItem('serene-tasks');
