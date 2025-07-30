@@ -25,7 +25,7 @@ export function PomodoroTimer() {
 
   useEffect(() => {
     // Create the worker
-    workerRef.current = new Worker(new URL('../workers/timer.worker.ts', import.meta.url));
+    workerRef.current = new Worker(new URL('../../workers/timer.worker.ts', import.meta.url));
     workerRef.current.postMessage({ type: 'set', value: PRESETS[mode] });
 
     // Listen for messages from the worker
