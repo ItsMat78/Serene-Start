@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -21,40 +21,60 @@ export function PomodoroTimer() {
   const [time, setTime] = useState(PRESETS[mode]);
   const [isActive, setIsActive] = useState(false);
   const [isGeneratingSpeech, setIsGeneratingSpeech] = useState(false);
+  const workerRef = useRef<Worker>();
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isActive && time > 0) {
-      interval = setInterval(() => {
-        setTime((prevTime) => prevTime - 1);
-      }, 1000);
-    } else if (isActive && time === 0) {
-      setIsActive(false);
-      if (!isGeneratingSpeech) {
-        setIsGeneratingSpeech(true);
-        getAlarmSpeechAction().then(({ audio }) => {
-          if (audio) {
-            const alarm = new Audio(audio);
-            alarm.play();
-          }
-          setIsGeneratingSpeech(false);
-        });
-      }
-    }
-    return () => {
-      if (interval) clearInterval(interval);
+    // Create the worker
+    workerRef.current = new Worker(new URL('../workers/timer.worker.ts', import.meta.url));
+    workerRef.current.postMessage({ type: 'set', value: PRESETS[mode] });
+
+    // Listen for messages from the worker
+    workerRef.current.onmessage = (e: MessageEvent) => {
+        const {type, value} = e.data;
+        if (type === "tick") {
+            setTime(value);
+            if (value === 0) {
+                setIsActive(false);
+            }
+        }
     };
-  }, [isActive, time, isGeneratingSpeech]);
-  
+
+    // Cleanup
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (time === 0) {
+        if (!isGeneratingSpeech) {
+            setIsGeneratingSpeech(true);
+            getAlarmSpeechAction().then(({ audio }) => {
+              if (audio) {
+                const alarm = new Audio(audio);
+                alarm.play();
+              }
+              setIsGeneratingSpeech(false);
+            });
+          }
+    }
+  }, [time, isGeneratingSpeech])
+
   useEffect(() => {
     document.title = `${formatTime(time)} - Serenity Start`;
   }, [time]);
 
   const toggleTimer = () => {
+    if (isActive) {
+        workerRef.current?.postMessage({type: "pause"})
+    } else {
+        workerRef.current?.postMessage({type: "start"})
+    }
     setIsActive(!isActive);
   };
 
   const resetTimer = useCallback(() => {
+    workerRef.current?.postMessage({type: "reset", value: PRESETS[mode]})
     setIsActive(false);
     setTime(PRESETS[mode]);
   }, [mode]);
@@ -62,7 +82,9 @@ export function PomodoroTimer() {
   const changeMode = (newMode: Mode) => {
     setMode(newMode);
     setIsActive(false);
-    setTime(PRESETS[newMode]);
+    const newTime = PRESETS[newMode];
+    setTime(newTime);
+    workerRef.current?.postMessage({type: "reset", value: newTime});
   };
 
   const formatTime = (seconds: number) => {
