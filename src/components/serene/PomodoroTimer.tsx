@@ -72,9 +72,14 @@ export function PomodoroTimer() {
 
   const toggleTimer = () => {
     if (isActive) {
-        workerRef.current?.postMessage({type: "pause"})
+      workerRef.current?.postMessage({ type: 'pause' });
     } else {
-        workerRef.current?.postMessage({type: "start"})
+      if (time === 0) {
+        const newTime = PRESETS[mode];
+        setTime(newTime);
+        workerRef.current?.postMessage({ type: 'reset', value: newTime });
+      }
+      workerRef.current?.postMessage({ type: 'start' });
     }
     setIsActive(!isActive);
   };
