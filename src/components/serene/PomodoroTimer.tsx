@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Play, Pause, RotateCcw, Coffee, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAlarmSpeechAction } from '@/app/actions';
 
 const PRESETS = {
   pomodoro: 25 * 60,
@@ -20,7 +19,6 @@ export function PomodoroTimer() {
   const [mode, setMode] = useState<Mode>('pomodoro');
   const [time, setTime] = useState(PRESETS[mode]);
   const [isActive, setIsActive] = useState(false);
-  const [isGeneratingSpeech, setIsGeneratingSpeech] = useState(false);
   const workerRef = useRef<Worker>();
 
   useEffect(() => {
@@ -47,18 +45,26 @@ export function PomodoroTimer() {
 
   useEffect(() => {
     if (time === 0) {
-        if (!isGeneratingSpeech) {
-            setIsGeneratingSpeech(true);
-            getAlarmSpeechAction().then(({ audio }) => {
-              if (audio) {
-                const alarm = new Audio(audio);
-                alarm.play();
-              }
-              setIsGeneratingSpeech(false);
-            });
-          }
+      let alarmFile = '';
+      switch (mode) {
+        case 'pomodoro':
+          alarmFile = '/pomodoro_alarm.wav';
+          break;
+        case 'shortBreak':
+          alarmFile = '/short_break_alarm.wav';
+          break;
+        case 'longBreak':
+          alarmFile = '/long_break_alarm.wav';
+          break;
+      }
+      if (alarmFile) {
+        const alarm = new Audio(alarmFile);
+        alarm.play().catch(error => {
+          console.error(`Could not play alarm sound: ${alarmFile}`, error);
+        });
+      }
     }
-  }, [time, isGeneratingSpeech])
+  }, [time, mode]);
 
   useEffect(() => {
     document.title = `${formatTime(time)} - Serenity Start`;
