@@ -25,6 +25,7 @@ export function PomodoroTimer() {
     // Create the worker
     workerRef.current = new Worker(new URL('../../workers/timer.worker.ts', import.meta.url));
     workerRef.current.postMessage({ type: 'set', value: PRESETS[mode] });
+    workerRef.current.postMessage({ type: 'setMode', value: mode });
 
     // Listen for messages from the worker
     workerRef.current.onmessage = (e: MessageEvent) => {
@@ -34,6 +35,25 @@ export function PomodoroTimer() {
             if (value === 0) {
                 setIsActive(false);
             }
+        } else if (type === "alarm") {
+            let alarmFile = '';
+            switch (value) {
+                case 'pomodoro':
+                alarmFile = '/pomodoro_alarm.wav';
+                break;
+                case 'shortBreak':
+                alarmFile = '/short_break_alarm.wav';
+                break;
+                case 'longBreak':
+                alarmFile = '/long_break_alarm.wav';
+                break;
+            }
+            if (alarmFile) {
+                const alarm = new Audio(alarmFile);
+                alarm.play().catch(error => {
+                console.error(`Could not play alarm sound: ${alarmFile}`, error);
+                });
+            }
         }
     };
 
@@ -42,29 +62,6 @@ export function PomodoroTimer() {
       workerRef.current?.terminate();
     };
   }, []);
-
-  useEffect(() => {
-    if (time === 0) {
-      let alarmFile = '';
-      switch (mode) {
-        case 'pomodoro':
-          alarmFile = '/pomodoro_alarm.wav';
-          break;
-        case 'shortBreak':
-          alarmFile = '/short_break_alarm.wav';
-          break;
-        case 'longBreak':
-          alarmFile = '/long_break_alarm.wav';
-          break;
-      }
-      if (alarmFile) {
-        const alarm = new Audio(alarmFile);
-        alarm.play().catch(error => {
-          console.error(`Could not play alarm sound: ${alarmFile}`, error);
-        });
-      }
-    }
-  }, [time, mode]);
 
   useEffect(() => {
     document.title = `${formatTime(time)} - Serenity Start`;
@@ -96,6 +93,7 @@ export function PomodoroTimer() {
     const newTime = PRESETS[newMode];
     setTime(newTime);
     workerRef.current?.postMessage({type: "reset", value: newTime});
+    workerRef.current?.postMessage({ type: 'setMode', value: newMode });
   };
 
   const formatTime = (seconds: number) => {

@@ -1,5 +1,6 @@
 let timer: NodeJS.Timeout | null = null;
 let seconds = 0;
+let mode = 'pomodoro';
 
 self.onmessage = (e: MessageEvent) => {
   const { type, value } = e.data;
@@ -13,6 +14,7 @@ self.onmessage = (e: MessageEvent) => {
         if (seconds === 0 && timer) {
             clearInterval(timer)
             timer = null
+            self.postMessage({ type: 'alarm', value: mode });
         }
       }, 1000);
       break;
@@ -28,6 +30,9 @@ self.onmessage = (e: MessageEvent) => {
       break;
     case 'set':
         seconds = value;
+        break;
+    case 'setMode':
+        mode = value;
         break;
   }
 };
