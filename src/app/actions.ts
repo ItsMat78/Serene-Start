@@ -4,9 +4,10 @@ import { generateWelcomeMessage } from '@/ai/flows/generate-welcome-message';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { Task } from '@/lib/types';
 
-export async function getWelcomeMessageAction(tasks: Array<Pick<Task, 'title' | 'description'>>, timeOfDay: string, dayOfWeek: string, name?: string) {
+export async function getWelcomeMessageAction(tasks: Array<Task>, timeOfDay: string, dayOfWeek: string, name?: string) {
   try {
-    const result = await generateWelcomeMessage({ timeOfDay, dayOfWeek, tasks, name });
+    const incompleteTasks = tasks.filter(task => !task.completed).map(({ title, description }) => ({ title, description }));
+    const result = await generateWelcomeMessage({ timeOfDay, dayOfWeek, tasks: incompleteTasks, name });
     return result;
   } catch (error) {
     console.error('Failed to generate welcome message:', error);
