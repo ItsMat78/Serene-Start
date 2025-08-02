@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 // Correctly import AppProvider and ThemeBody from the refactored file
 import { AppProvider } from '@/hooks/use-theme';
 import { AuthProvider } from '@/hooks/use-auth';
+import { PWAInstallProvider } from '@/hooks/use-pwa-install';
 
 export const metadata: Metadata = {
   title: 'Serenity Start',
@@ -28,10 +29,12 @@ export default function RootLayout({
       {/* Wrap the entire application in the AuthProvider and our new AppProvider */}
       <AuthProvider>
         <AppProvider>
-          <body className="font-body antialiased">
-            {children}
-            <Toaster />
-          </body>
+          <PWAInstallProvider>
+            <body className="font-body antialiased">
+              {children}
+              <Toaster />
+            </body>
+          </PWAInstallProvider>
         </AppProvider>
       </AuthProvider>
     </html>
