@@ -10,6 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useEffect, useState, useMemo } from 'react';
 import { cn } from "@/lib/utils";
 import { Skeleton } from '@/components/ui/skeleton';
+import { InstallPWAButton } from '@/components/serene/InstallPWAButton';
 
 export default function Home() {
   // Pull all state directly from the new central context.
@@ -47,7 +48,8 @@ export default function Home() {
         (theme !== 'custom' || !customWallpaper) && 'bg-background'
       )}
     >
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50 flex items-center space-x-2">
+        <InstallPWAButton />
         <ThemeSwitcherDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
       </div>
 
