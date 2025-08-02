@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -23,11 +24,12 @@ import {
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type TaskItemProps = {
   task: Task;
   onToggle: (id: string) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id:string) => void;
   onUpdate: (id: string, title: string, description?: string) => void;
 };
 
@@ -35,6 +37,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description || '');
+  const isMobile = useIsMobile();
 
   const links = extractLinks(task.description || '');
   const descriptionText = removeLinks(task.description || '');
@@ -52,74 +55,136 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
     setIsEditing(false);
   };
 
-  const EditModeButtons = () => (
-    <>
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8">
-            <Trash2 className="size-4 text-destructive/80" />
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              task "{task.title}".
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => onDelete(task.id)}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="size-8"
-        onClick={handleSave}
+  if (isMobile) {
+    // Mobile-specific bar layout
+    return (
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: -10, scaleY: 0.9 }}
+        animate={{ opacity: 1, y: 0, scaleY: 1 }}
+        exit={{ opacity: 0, x: -50, transition: { duration: 0.2 } }}
+        className="w-full origin-top"
       >
-        <Save className="size-4 text-accent" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="size-8"
-        onClick={handleCancel}
-      >
-        <X className="size-4" />
-      </Button>
-    </>
-  );
-
-  const ViewModeButtons = () => (
-    <>
-      {!task.completed && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8 opacity-60 hover:opacity-100"
-          onClick={() => setIsEditing(true)}
+        <div className={cn(
+            'group flex items-stretch bg-card/80 backdrop-blur-sm border-b border-border/50 shadow-sm w-full transition-shadow hover:shadow-md rounded-lg overflow-hidden',
+            task.completed && 'bg-card/60'
+          )}
         >
-          <Edit className="size-4" />
-        </Button>
-      )}
-    </>
-  );
+          <div 
+            className="flex-shrink-0 w-2" 
+            style={{ backgroundColor: task.completed ? 'transparent' : task.color || 'hsl(var(--primary))' }}
+          />
 
+          <div className="flex-shrink-0 pl-2 py-2 flex items-center">
+              <AlertDialog>
+                  <TooltipProvider>
+                      <Tooltip>
+                          <TooltipTrigger asChild>
+                              <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className={cn('size-7 rounded-full transition-colors', task.completed ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10')}>
+                                      <CheckCircle className="size-5" />
+                                  </Button>
+                              </AlertDialogTrigger>
+                          </TooltipTrigger>
+                          <TooltipContent><p>Mark as {task.completed ? 'incomplete' : 'complete'}</p></TooltipContent>
+                      </Tooltip>
+                  </TooltipProvider>
+                   <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-amber-500" />{task.completed ? 'Mark as Incomplete?' : 'Complete Task?'}</AlertDialogTitle>
+                        <AlertDialogDescription>Are you sure you want to mark "{task.title}" as {task.completed ? 'incomplete' : 'complete'}?</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => onToggle(task.id)}>{task.completed ? 'Mark Incomplete' : 'Complete'}</AlertDialogAction>
+                      </AlertDialogFooter>
+                  </AlertDialogContent>
+              </AlertDialog>
+          </div>
+
+          {isEditing ? (
+            <div className="flex-grow p-4">
+              <Input
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="h-8 text-base mb-2"
+                autoFocus
+              />
+              <Textarea
+                value={editedDescription}
+                onChange={(e) => setEditedDescription(e.target.value)}
+                placeholder="Add details and links..."
+                className="text-sm"
+              />
+            </div>
+          ) : (
+            <div className="flex-grow p-4">
+              <h3 className={cn("font-medium", task.completed && "line-through text-muted-foreground")}>
+                {task.title}
+              </h3>
+              {descriptionText && (
+                <p className="text-sm text-muted-foreground mt-1">{descriptionText}</p>
+              )}
+              {links.length > 0 && (
+                 <div className="flex flex-wrap gap-2 mt-2">
+                    <TooltipProvider>
+                      {links.map((link, index) => (
+                        <Tooltip key={index}>
+                          <TooltipTrigger asChild>
+                            <a href={link.href} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                              <Badge variant="secondary" className="hover:bg-accent transition-colors">
+                                <LinkIcon className="size-3 mr-1.5" />
+                                {link.title.length > 20 ? `${link.title.substring(0, 20)}...` : link.title}
+                              </Badge>
+                            </a>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{link.href}</p></TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </TooltipProvider>
+                  </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex-shrink-0 pr-2 py-2 flex items-center gap-1">
+            {isEditing ? (
+              <>
+                <Button variant="ghost" size="icon" className="size-7" onClick={handleSave}><Save className="size-4 text-green-500" /></Button>
+                <Button variant="ghost" size="icon" className="size-7" onClick={handleCancel}><X className="size-4" /></Button>
+              </>
+            ) : (
+               <Button variant="ghost" size="icon" className="size-7 opacity-0 group-hover:opacity-60 transition-opacity" onClick={() => setIsEditing(true)}><Edit className="size-4" /></Button>
+            )}
+             <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="size-7 opacity-0 group-hover:opacity-60 transition-opacity"><Trash2 className="size-4 text-destructive/80" /></Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>This will permanently delete "{task.title}".</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onDelete(task.id)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Desktop card layout
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: -20, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
-      className="w-full"
+      initial={{ opacity: 0, y: -20, scaleY: 0.9 }}
+      animate={{ opacity: 1, y: 0, scaleY: 1 }}
+      exit={{ opacity: 0, scaleY: 0.8, transition: { duration: 0.2 } }}
+      className="w-full origin-top"
     >
       <Card
         className={cn(
@@ -244,7 +309,64 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
             </TooltipProvider>
           </div>
           <div className="flex items-center gap-1">
-            {isEditing ? <EditModeButtons /> : <ViewModeButtons />}
+            {isEditing ? (
+                <>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="size-8">
+                        <Trash2 className="size-4 text-destructive/80" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the
+                          task "{task.title}".
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => onDelete(task.id)}
+                          className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    onClick={handleSave}
+                  >
+                    <Save className="size-4 text-accent" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    onClick={handleCancel}
+                  >
+                    <X className="size-4" />
+                  </Button>
+                </>
+            ) : (
+                <>
+                  {!task.completed && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 opacity-60 hover:opacity-100"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      <Edit className="size-4" />
+                    </Button>
+                  )}
+                </>
+            )}
           </div>
         </CardFooter>
       </Card>

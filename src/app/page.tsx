@@ -1,3 +1,4 @@
+
 'use client'
 
 import { DateTimeDisplay } from '@/components/serene/DateTimeDisplay';
@@ -41,6 +42,42 @@ export default function Home() {
     return <LoadingSkeleton />;
   }
 
+  // Mobile-specific layout
+  if (isMobile) {
+    return (
+      <main 
+        className={cn(
+          "min-h-screen text-foreground font-body selection:bg-primary/20",
+          (theme !== 'custom' || !customWallpaper) && 'bg-background'
+        )}
+      >
+        <div className="fixed top-4 right-4 z-50 flex items-center space-x-2">
+          <InstallPWAButton />
+          <ThemeSwitcherDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+          <div className="flex flex-col gap-4">
+
+            <div className={cn(
+              "flex flex-col gap-4",
+              theme === 'custom' && 'bg-card/80 backdrop-blur-sm border-border/50 shadow-lg rounded-lg p-6'
+            )}>
+              <div className="flex-grow">
+                {memoizedWelcomeMessage}
+              </div>
+            </div>
+
+            <PomodoroTimer />
+            <TodoList />
+
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Desktop layout
   return (
     <main 
       className={cn(
@@ -63,11 +100,10 @@ export default function Home() {
               <div className="flex-grow">
                 {memoizedWelcomeMessage}
               </div>
-              {!isMobile && <DateTimeDisplay />}
+              <DateTimeDisplay />
           </div>
 
           <div className="lg:col-span-2">
-            {/* The onTasksChange prop is GONE. TodoList is now self-sufficient. */}
             <TodoList />
           </div>
 

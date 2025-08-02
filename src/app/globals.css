@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 207 88% 94%;
+    --background: 207 88% 88%;
     --foreground: 222.2 84% 4.9%;
     --card: 207 88% 97%;
     --card-foreground: 222.2 84% 4.9%;
@@ -20,6 +20,8 @@
     --accent-foreground: 125 60% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+    --brand: 207 82% 68%;
+    --brand-foreground: 222.2 84% 4.9%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 207 82% 68%;
@@ -55,9 +57,11 @@
     --accent-foreground: 125 60% 9%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
+    --brand: 207 82% 68%;
+    --brand-foreground: 222.2 84% 4.9%;
+    --border: 217 33% 7%;
     --input: 217 33% 17%;
-    --ring: 207 82% 68%;
+    --ring: 207 82% 10%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -105,16 +109,17 @@
   }
 
   .custom.dark {
+    --background: 207 20% 21%;
     --foreground: 210 40% 98%;
     --muted-foreground: 215 20% 85%;
-    --card-foreground: 210 40% 98%;
+    --card-foreground: 210 40% 80%;
     --popover-foreground: 210 40% 98%;
-    --primary: 207 82% 68%;
+    --primary: hsla(207, 82%, 68%, 0.15);
     --primary-foreground: 210 40% 98%;
     --accent: 125 39% 64%;
     --accent-foreground: 210 40% 98%;
     --border: hsla(0, 0%, 100%, 0.2);
-    --input: hsla(0, 0%, 100%, 0.1);
+    --input: hsla(0, 100%, 50%, 0.1);
     --ring: 207 82% 68%;
   }
 

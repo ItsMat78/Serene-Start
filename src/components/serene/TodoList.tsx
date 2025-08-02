@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -9,18 +10,17 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Confetti } from './Confetti';
 import { useToast } from '@/hooks/use-toast';
 import { PartyPopper } from 'lucide-react';
-import { useAppContext } from '@/hooks/use-theme'; // Use the new central context
+import { useAppContext } from '@/hooks/use-theme';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 const TASK_COLORS = ['#64B5F6', '#81C784', '#FFD54F', '#FF8A65', '#9575CD', '#F06292'];
 
-// No props are needed anymore. The component is self-sufficient via the context.
 export function TodoList() {
-  // Get tasks and the global setter function from our new central context.
   const { tasks, setTasks } = useAppContext(); 
   const [showConfetti, setShowConfetti] = useState(false);
   const { toast } = useToast();
-
-  // All old useEffects for loading/saving are GONE. This is now handled centrally.
+  const isMobile = useIsMobile();
 
   const handleAddTask = (title: string, description?: string) => {
     const newTask: Task = {
@@ -30,7 +30,6 @@ export function TodoList() {
       completed: false,
       color: TASK_COLORS[Math.floor(Math.random() * TASK_COLORS.length)],
     };
-    // Update the global state. The central useEffect will handle persistence.
     setTasks([newTask, ...tasks]);
   };
 
@@ -49,7 +48,7 @@ export function TodoList() {
       return task;
     });
     
-    setTasks(updatedTasks); // Update the global state
+    setTasks(updatedTasks);
 
     if (isCompleting) {
       setShowConfetti(true);
@@ -70,16 +69,68 @@ export function TodoList() {
     const updatedTasks = tasks.map((task) => 
       (task.id === id ? { ...task, title, description } : task)
     );
-    setTasks(updatedTasks); // Update the global state
+    setTasks(updatedTasks);
   };
 
   const handleDeleteTask = (id: string) => {
     const updatedTasks = tasks.filter((task) => task.id !== id);
-    setTasks(updatedTasks); // Update the global state
+    setTasks(updatedTasks);
   };
 
   const ongoingTasks = tasks.filter((task) => !task.completed);
   const completedTasks = tasks.filter((task) => task.completed);
+  
+  const taskContainerClasses = cn(
+    isMobile ? "flex flex-col gap-1" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+  );
+
+  if (isMobile) {
+    return (
+        <div className="space-y-4">
+            <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg">
+                <CardContent className="p-3 space-y-3">
+                    <AddTaskForm onAddTask={handleAddTask} />
+                    <div className={taskContainerClasses}>
+                        <AnimatePresence>
+                        {ongoingTasks.map((task) => (
+                            <TaskItem
+                                key={task.id}
+                                task={task}
+                                onToggle={handleToggleTask}
+                                onDelete={handleDeleteTask}
+                                onUpdate={handleUpdateTask}
+                            />
+                        ))}
+                        </AnimatePresence>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {completedTasks.length > 0 && (
+                <Card className="bg-card/60 backdrop-blur-sm border-border/30 shadow-lg">
+                    <CardHeader className="p-3">
+                        <CardTitle className="font-headline text-xl text-shadow">Completed</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 pt-0">
+                        <div className={taskContainerClasses}>
+                            <AnimatePresence>
+                            {completedTasks.map((task) => (
+                                <TaskItem
+                                    key={task.id}
+                                    task={task}
+                                    onToggle={handleToggleTask}
+                                    onDelete={handleDeleteTask}
+                                    onUpdate={handleUpdateTask}
+                                />
+                            ))}
+                            </AnimatePresence>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+        </div>
+    );
+  }
 
   return (
     <div className="relative space-y-10">
@@ -92,7 +143,7 @@ export function TodoList() {
               <AddTaskForm onAddTask={handleAddTask} />
             </div>
             {ongoingTasks.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className={taskContainerClasses}>
                 <AnimatePresence>
                   {ongoingTasks.map((task) => (
                     <TaskItem
@@ -119,7 +170,7 @@ export function TodoList() {
               <CardTitle className="font-headline text-2xl text-shadow">Completed</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className={taskContainerClasses}>
                 <AnimatePresence>
                   {completedTasks.map((task) => (
                     <TaskItem

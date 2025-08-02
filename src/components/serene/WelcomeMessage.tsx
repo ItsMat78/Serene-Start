@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Skeleton } from '@/components/ui/skeleton';
@@ -76,8 +77,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
           }
         }
 
-        const taskPayload = tasks.map(({ title, description }) => ({ title, description }));
-        const response = await getWelcomeMessageAction(taskPayload, timeOfDay, dayOfWeek, name || undefined);
+        const response = await getWelcomeMessageAction(tasks, timeOfDay, dayOfWeek, name || undefined);
 
         if (response.message && response.focus) {
           const newMessage: CachedMessage = {
@@ -153,11 +153,11 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
       transition={{ duration: 0.4 }}
       className="flex-grow"
     >
-      <h1 className="text-3xl sm:text-4xl font-headline font-bold text-shadow leading-tight mb-2">
+      <h1 className="text-2xl sm:text-4xl font-headline font-bold text-shadow leading-tight mb-2">
         {welcomeMessage?.message}
       </h1>
       <div className="flex items-center gap-3">
-        <p className="text-md sm:text-lg text-muted-foreground">
+        <p className="text-sm sm:text-lg text-muted-foreground">
           {welcomeMessage?.focus}
         </p>
         <Button onClick={handlePlaySpeech} variant="ghost" size="icon" className="shrink-0" disabled={isSpeaking}>

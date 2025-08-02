@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -11,6 +12,7 @@ import { Textarea } from '../ui/textarea';
 import { useRef, useState } from 'react';
 import { motion, useAnimate } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Task title cannot be empty.'),
@@ -25,6 +27,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [scope, animate] = useAnimate();
   const formContainerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,37 +47,44 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
     setIsExpanded(expand);
     const formContainer = formContainerRef.current;
     if (formContainer) {
-      animate(scope.current, { height: expand ? formContainer.scrollHeight : 0 }, { duration: 0.3, ease: 'easeInOut' });
+      const targetHeight = expand ? formContainer.scrollHeight : 0;
+      animate(scope.current, { height: targetHeight }, { duration: 0.3, ease: 'easeInOut' });
     }
   };
+  
+  const plusIconSize = isMobile ? 'size-4' : 'size-5';
+  const formPadding = isMobile ? 'p-2' : 'p-3';
+  const buttonContainerClass = isMobile ? 'size-9' : 'size-10';
+  const inputHeight = isMobile ? 'h-9' : 'h-10';
+  const placeholderText = isMobile ? "Add task..." : "Add a new task...";
 
   return (
     <div
       className={cn(
-        'p-3 border rounded-lg transition-colors',
+        `${formPadding} border rounded-lg transition-colors`,
         isExpanded
           ? 'bg-card border-border'
           : 'bg-transparent border-dashed hover:border-primary/50 hover:bg-primary/5'
       )}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2">
         <motion.button
           onClick={() => handleToggle(!isExpanded)}
-          className="flex-shrink-0 size-10 rounded-full bg-accent text-accent-foreground flex items-center justify-center hover:bg-accent/90 transition-colors"
+          className={`flex-shrink-0 ${buttonContainerClass} rounded-full bg-accent text-accent-foreground flex items-center justify-center hover:bg-accent/90 transition-colors`}
           aria-label={isExpanded ? 'Cancel adding task' : 'Add a new task'}
         >
           <motion.div animate={{ rotate: isExpanded ? 45 : 0 }}>
-            <Plus className="size-5" />
+            <Plus className={plusIconSize} />
           </motion.div>
         </motion.button>
 
         <div className="w-full overflow-hidden">
           <button
-            className="flex items-center h-10 text-left w-full disabled:cursor-text"
+            className={`flex items-center text-left w-full disabled:cursor-text ${inputHeight}`}
             onClick={() => handleToggle(true)}
             disabled={isExpanded}
           >
-            <span className="text-muted-foreground">Add a new task...</span>
+            <span className={cn("text-muted-foreground", isMobile && "text-sm")}>{placeholderText}</span>
           </button>
 
           <motion.div
@@ -84,7 +94,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
           >
             <div ref={formContainerRef}>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 pt-1">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 pt-1">
                   <FormField
                     control={form.control}
                     name="title"
@@ -94,7 +104,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                           <Input
                             placeholder="What needs to be done?"
                             {...field}
-                            className="h-10 text-base"
+                            className={cn(inputHeight, isMobile ? 'text-sm' : 'text-base')}
                             autoFocus
                           />
                         </FormControl>
@@ -108,14 +118,14 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Textarea placeholder="Add details or links (optional)" {...field} />
+                          <Textarea placeholder="Add details or links (optional)" className={cn(isMobile ? 'text-sm' : '')} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <div className="flex justify-end pt-1">
-                    <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    <Button type="submit" size={isMobile ? 'sm' : 'default'} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                       Add Task
                     </Button>
                   </div>
