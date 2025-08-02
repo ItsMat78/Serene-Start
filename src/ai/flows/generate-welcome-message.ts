@@ -18,6 +18,7 @@ const WelcomeMessageInputSchema = z.object({
   tasks: z.array(z.object({
     title: z.string(),
     description: z.string().optional(),
+    completed: z.boolean(),
   })).describe('A list of the users current ongoing tasks, including their titles and descriptions.'),
 });
 export type WelcomeMessageInput = z.infer<typeof WelcomeMessageInputSchema>;
@@ -44,7 +45,7 @@ const prompt = ai.definePrompt({
   - Day of week: {{{dayOfWeek}}}
   - Ongoing tasks:
   {{#if tasks}}
-    {{#each tasks}}
+    {{#each tasks}}{{#unless this.completed}}
     - Title: {{{this.title}}}{{#if this.description}}, Description: {{{this.description}}}{{/if}}
     {{/each}}
   {{else}}
@@ -55,7 +56,7 @@ const prompt = ai.definePrompt({
   1.  **Generate a Welcome Message**: Create a short, direct welcome message that does NOT include the time of day or day of the week. Address the user by name if required. Be creative.
   2.  **Generate a Focus Suggestion**: Based on their tasks (including descriptions), the time, and the day, provide a brief, specific suggestion. This is where you should incorporate the time/day context. Be critical of the user so they feel compelled to do their tasks. Start with the wireframe. If there are no tasks, provide a general motivating sentence about avoiding procrastination.
   
-  **IMPORTANT RULE**: Only use the user's name in the 'message' field. DO NOT include their name in the 'focus' field. The 'message' and 'focus' fields must be distinct and not repeat the same greeting. You must be in a sarcastic tone while laughing. Temperature = 1.8.
+  **IMPORTANT RULE**: Only use the user's name in the 'message' field. DO NOT include their name in the 'focus' field. The 'message' and 'focus' fields must be distinct and not repeat the same greeting. **CRITICAL**: When generating the focus suggestion, ONLY consider tasks where the 'completed' field is set to 'false'. You must be in a sarcastic tone while laughing. Temperature = 1.8.
 
   Your output must be in JSON format, adhering to the specified schema.
   `,
