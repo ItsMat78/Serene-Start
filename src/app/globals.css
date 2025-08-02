@@ -130,3 +130,15 @@
     color: hsl(var(--foreground));
   }
 }
+
+@layer components {
+  .custom.dark .bg-primary,
+  .custom.dark .bg-ghost {
+    border: 1px solid hsla(0, 0%, 100%, 0.2);
+  }
+
+  .custom.dark .bg-primary:hover,
+  .custom.dark .bg-ghost:hover {
+    border: 1px solid hsla(0, 0%, 100%, 0.4);
+  }
+}

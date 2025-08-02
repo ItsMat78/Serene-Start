@@ -4,17 +4,28 @@ import {useEffect, useState} from 'react';
 import {Button} from '@/components/ui/button';
 import {Download} from 'lucide-react';
 
+// A global variable to hold the install prompt event
+let deferredPrompt: BeforeInstallPromptEvent | null = null;
+
 export const InstallPWAButton = () => {
-  const [installEvent, setInstallEvent] =
-    useState<BeforeInstallPromptEvent | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
-      setInstallEvent(event as BeforeInstallPromptEvent);
+      deferredPrompt = event as BeforeInstallPromptEvent;
+      // The event is now saved. We can show the button.
+      setIsReady(true);
     };
 
+    // Listen for the install prompt event
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Also, check if the app is already in standalone mode
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      // Don't show the button if the app is already installed.
+      setIsReady(false);
+    }
 
     return () => {
       window.removeEventListener(
@@ -25,20 +36,23 @@ export const InstallPWAButton = () => {
   }, []);
 
   const handleInstallClick = () => {
-    if (installEvent) {
-      installEvent.prompt();
-      installEvent.userChoice.then(choiceResult => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(choiceResult => {
         if (choiceResult.outcome === 'accepted') {
           console.log('User accepted the install prompt');
         } else {
           console.log('User dismissed the install prompt');
         }
-        setInstallEvent(null);
+        // We can only use the prompt once.
+        deferredPrompt = null;
+        // Hide the button after prompting.
+        setIsReady(false);
       });
     }
   };
 
-  if (!installEvent) {
+  if (!isReady) {
     return null;
   }
 
