@@ -34,8 +34,22 @@ export function PomodoroTimer() {
 
   useEffect(() => {
     workerRef.current = new Worker(new URL('../../workers/timer.worker.ts', import.meta.url));
-    workerRef.current.postMessage({ type: 'set', value: getActivePreset() });
-    workerRef.current.postMessage({ type: 'setMode', value: mode });
+    
+    const savedState = localStorage.getItem('pomodoroState');
+    if (savedState) {
+      const { seconds, mode: savedMode, isActive: savedIsActive, customTime: savedCustomTime } = JSON.parse(savedState);
+      setMode(savedMode);
+      setCustomTime(savedCustomTime);
+      setTime(seconds);
+      setIsActive(savedIsActive);
+      workerRef.current.postMessage({ type: 'restoreState', value: { seconds, mode: savedMode } });
+      if(savedIsActive) {
+        workerRef.current.postMessage({ type: 'start' });
+      }
+    } else {
+        workerRef.current.postMessage({ type: 'set', value: getActivePreset() });
+        workerRef.current.postMessage({ type: 'setMode', value: mode });
+    }
 
     workerRef.current.onmessage = (e: MessageEvent) => {
         const {type, value} = e.data;
@@ -48,6 +62,9 @@ export function PomodoroTimer() {
             const alarmFile = `/sounds/${value}_alarm.wav`;
             const alarm = new Audio(alarmFile);
             alarm.play().catch(error => console.error(`Could not play alarm: ${alarmFile}`, error));
+            localStorage.removeItem('pomodoroState');
+        } else if (type === "saveState") {
+            localStorage.setItem('pomodoroState', JSON.stringify({ ...value, isActive, customTime }));
         }
     };
 
@@ -81,6 +98,7 @@ export function PomodoroTimer() {
     workerRef.current?.postMessage({type: "reset", value: newTime})
     setIsActive(false);
     setTime(newTime);
+    localStorage.removeItem('pomodoroState');
   }, [mode, customTime]);
 
   const changeMode = (newMode: Mode) => {
@@ -91,6 +109,7 @@ export function PomodoroTimer() {
     setTime(newTime);
     workerRef.current?.postMessage({type: "reset", value: newTime});
     workerRef.current?.postMessage({ type: 'setMode', value: newMode });
+    localStorage.removeItem('pomodoroState');
   };
   
   const handleSaveCustomTime = () => {
