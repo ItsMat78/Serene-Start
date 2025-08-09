@@ -12,6 +12,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { cn } from "@/lib/utils";
 import { Skeleton } from '@/components/ui/skeleton';
 import { InstallPWAButton } from '@/components/serene/InstallPWAButton';
+import { Header } from '@/components/serene/Header';
 
 export default function Home() {
   // Pull all state directly from the new central context.
@@ -47,7 +48,7 @@ export default function Home() {
     return (
       <main 
         className={cn(
-          "min-h-screen text-foreground font-body selection:bg-primary/20",
+          "text-foreground font-body selection:bg-primary/20",
           (theme !== 'custom' || !customWallpaper) && 'bg-background'
         )}
       >
@@ -56,11 +57,12 @@ export default function Home() {
           <ThemeSwitcherDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+          <Header />
           <div className="flex flex-col gap-4">
 
             <div className={cn(
-              "flex flex-col gap-4",
+              "flex flex-col gap-4 mt-4",
               theme === 'custom' && 'bg-card/80 backdrop-blur-sm border-border/50 shadow-lg rounded-lg p-6'
             )}>
               <div className="flex-grow">
@@ -81,7 +83,7 @@ export default function Home() {
   return (
     <main 
       className={cn(
-        "min-h-screen text-foreground font-body selection:bg-primary/20",
+        "text-foreground font-body selection:bg-primary/20",
         (theme !== 'custom' || !customWallpaper) && 'bg-background'
       )}
     >
@@ -90,11 +92,12 @@ export default function Home() {
         <ThemeSwitcherDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        <Header />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           
           <div className={cn(
-            "lg:col-span-3 flex flex-col lg:flex-row justify-between lg:items-center gap-4",
+            "lg:col-span-3 flex flex-col lg:flex-row justify-between lg:items-center gap-4 mt-4",
             theme === 'custom' && 'bg-card/80 backdrop-blur-sm border-border/50 shadow-lg rounded-lg p-6'
           )}>
               <div className="flex-grow">
@@ -121,7 +124,8 @@ export default function Home() {
 function LoadingSkeleton() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        <Header />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-3 space-y-4">
             <Skeleton className="h-12 w-3/4" />
