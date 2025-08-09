@@ -118,7 +118,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Textarea placeholder="Add details or links (optional)" className={cn(isMobile ? 'text-sm' : '')} />
+                          <Textarea placeholder="Add details or links (optional)" {...field} className={cn(isMobile ? 'text-sm' : '')} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

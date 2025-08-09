@@ -137,7 +137,7 @@ export function TodoList() {
       {showConfetti && <Confetti />}
 
       <motion.div layout className="space-y-10">
-        <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg overflow-hidden">
+        <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg">
           <CardContent className="p-6">
             <div className="pb-4">
               <AddTaskForm onAddTask={handleAddTask} />

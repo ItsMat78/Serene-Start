@@ -54,7 +54,7 @@ export function WelcomeMessage({ tasks }: WelcomeMessageProps) {
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const taskStateIdentifier = JSON.stringify(tasks.map(t => ({ id: t.id, title: t.title, description: t.description })));
+  const taskStateIdentifier = JSON.stringify(tasks);
 
   useEffect(() => {
     const fetchWelcomeMessage = async () => {

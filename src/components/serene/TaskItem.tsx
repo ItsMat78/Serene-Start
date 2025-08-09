@@ -66,7 +66,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
         className="w-full origin-top"
       >
         <div className={cn(
-            'group flex items-stretch bg-card/80 backdrop-blur-sm border-b border-border/50 shadow-sm w-full transition-shadow hover:shadow-md rounded-lg overflow-hidden',
+            'group flex items-stretch bg-card/80 backdrop-blur-sm border-b border-border/50 shadow-sm w-full transition-shadow hover:shadow-md rounded-lg',
             task.completed && 'bg-card/60'
           )}
         >
@@ -74,33 +74,6 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
             className="flex-shrink-0 w-2" 
             style={{ backgroundColor: task.completed ? 'transparent' : task.color || 'hsl(var(--primary))' }}
           />
-
-          <div className="flex-shrink-0 pl-2 py-2 flex items-center">
-              <AlertDialog>
-                  <TooltipProvider>
-                      <Tooltip>
-                          <TooltipTrigger asChild>
-                              <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className={cn('size-7 rounded-full transition-colors', task.completed ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10')}>
-                                      <CheckCircle className="size-5" />
-                                  </Button>
-                              </AlertDialogTrigger>
-                          </TooltipTrigger>
-                          <TooltipContent><p>Mark as {task.completed ? 'incomplete' : 'complete'}</p></TooltipContent>
-                      </Tooltip>
-                  </TooltipProvider>
-                   <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-amber-500" />{task.completed ? 'Mark as Incomplete?' : 'Complete Task?'}</AlertDialogTitle>
-                        <AlertDialogDescription>Are you sure you want to mark "{task.title}" as {task.completed ? 'incomplete' : 'complete'}?</AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onToggle(task.id)}>{task.completed ? 'Mark Incomplete' : 'Complete'}</AlertDialogAction>
-                      </AlertDialogFooter>
-                  </AlertDialogContent>
-              </AlertDialog>
-          </div>
 
           {isEditing ? (
             <div className="flex-grow p-4">
@@ -118,7 +91,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
               />
             </div>
           ) : (
-            <div className="flex-grow p-4">
+            <div className="flex-grow p-3">
               <h3 className={cn("font-medium", task.completed && "line-through text-muted-foreground")}>
                 {task.title}
               </h3>
@@ -152,25 +125,51 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: TaskItemProps) 
               <>
                 <Button variant="ghost" size="icon" className="size-7" onClick={handleSave}><Save className="size-4 text-green-500" /></Button>
                 <Button variant="ghost" size="icon" className="size-7" onClick={handleCancel}><X className="size-4" /></Button>
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="size-7"><Trash2 className="size-4 text-destructive/80" /></Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>This will permanently delete "{task.title}".</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => onDelete(task.id)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
               </>
             ) : (
-               <Button variant="ghost" size="icon" className="size-7 opacity-0 group-hover:opacity-60 transition-opacity" onClick={() => setIsEditing(true)}><Edit className="size-4" /></Button>
+              <>
+                <Button variant="ghost" size="icon" className="size-7" onClick={() => setIsEditing(true)}><Edit className="size-4" /></Button>
+                 <AlertDialog>
+                      <TooltipProvider>
+                          <Tooltip>
+                              <TooltipTrigger asChild>
+                                  <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="icon" className={cn('size-7 rounded-full transition-colors', task.completed ? 'bg-primary/20 text-primary' : '')}>
+                                          <CheckCircle className="size-5" />
+                                      </Button>
+                                  </AlertDialogTrigger>
+                              </TooltipTrigger>
+                              <TooltipContent><p>Mark as {task.completed ? 'incomplete' : 'complete'}</p></TooltipContent>
+                          </Tooltip>
+                      </TooltipProvider>
+                       <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-amber-500" />{task.completed ? 'Mark as Incomplete?' : 'Complete Task?'}</AlertDialogTitle>
+                            <AlertDialogDescription>Are you sure you want to mark "{task.title}" as {task.completed ? 'incomplete' : 'complete'}?</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => onToggle(task.id)}>{task.completed ? 'Mark Incomplete' : 'Complete'}</AlertDialogAction>
+                          </AlertDialogFooter>
+                      </AlertDialogContent>
+                  </AlertDialog>
+              </>
             )}
-             <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="size-7 opacity-0 group-hover:opacity-60 transition-opacity"><Trash2 className="size-4 text-destructive/80" /></Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>This will permanently delete "{task.title}".</AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDelete(task.id)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">Delete</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
           </div>
         </div>
       </motion.div>
