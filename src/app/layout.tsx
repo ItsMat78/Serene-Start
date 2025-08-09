@@ -30,7 +30,7 @@ export default function RootLayout({
       <AuthProvider>
         <AppProvider>
           <PWAInstallProvider>
-            <body className="font-body antialiased">
+            <body className="font-body antialiased min-h-screen bg-background">
               {children}
               <Toaster />
             </body>

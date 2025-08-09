@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Plus } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useAnimate } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -27,6 +27,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [scope, animate] = useAnimate();
   const formContainerRef = useRef<HTMLDivElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -36,6 +37,12 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
       description: '',
     },
   });
+
+  useEffect(() => {
+    if (isExpanded && titleInputRef.current) {
+      titleInputRef.current.focus();
+    }
+  }, [isExpanded]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onAddTask(values.title, values.description);
@@ -104,8 +111,8 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                           <Input
                             placeholder="What needs to be done?"
                             {...field}
+                            ref={titleInputRef}
                             className={cn(inputHeight, isMobile ? 'text-sm' : 'text-base')}
-                            autoFocus
                           />
                         </FormControl>
                         <FormMessage />

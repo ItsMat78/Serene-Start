@@ -40,7 +40,7 @@ export default function Home() {
 
   // Display a loading skeleton until the initial data load is complete.
   if (!isDataLoaded) {
-    return <LoadingSkeleton />;
+    return <LoadingSkeleton isMobile={isMobile} />;
   }
 
   // Mobile-specific layout
@@ -48,7 +48,7 @@ export default function Home() {
     return (
       <main 
         className={cn(
-          "text-foreground font-body selection:bg-primary/20",
+          "min-h-screen text-foreground font-body selection:bg-primary/20",
           (theme !== 'custom' || !customWallpaper) && 'bg-background'
         )}
       >
@@ -121,9 +121,27 @@ export default function Home() {
 }
 
 // A simple loading skeleton component to prevent layout shifts on load.
-function LoadingSkeleton() {
+function LoadingSkeleton({ isMobile }: { isMobile: boolean }) {
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+          <Header />
+          <div className="flex flex-col gap-4 mt-4">
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-12 w-3/4" />
+              <Skeleton className="h-8 w-1/2" />
+            </div>
+            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         <Header />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
