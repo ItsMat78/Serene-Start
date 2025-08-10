@@ -1,9 +1,11 @@
 let timer: NodeJS.Timeout | null = null;
 let seconds = 0;
 let mode = 'pomodoro';
+let timestamp = 0;
 
 const saveState = () => {
-  self.postMessage({ type: 'saveState', value: { seconds, mode } });
+  timestamp = Date.now();
+  self.postMessage({ type: 'saveState', value: { seconds, mode, timestamp } });
 };
 
 self.onmessage = (e: MessageEvent) => {
@@ -44,8 +46,15 @@ self.onmessage = (e: MessageEvent) => {
       saveState();
       break;
     case 'restoreState':
-      seconds = value.seconds;
-      mode = value.mode;
+      const { seconds: savedSeconds, mode: savedMode, timestamp: savedTimestamp } = value;
+      seconds = savedSeconds;
+      mode = savedMode;
+
+      if (savedTimestamp && timer === null) {
+        const elapsedSeconds = Math.round((Date.now() - savedTimestamp) / 1000);
+        seconds = Math.max(0, seconds - elapsedSeconds);
+      }
+
       self.postMessage({ type: 'tick', value: seconds });
       break;
   }

@@ -37,13 +37,21 @@ export function PomodoroTimer() {
     
     const savedState = localStorage.getItem('pomodoroState');
     if (savedState) {
-      const { seconds, mode: savedMode, isActive: savedIsActive, customTime: savedCustomTime } = JSON.parse(savedState);
+      const { seconds, mode: savedMode, customTime: savedCustomTime, timestamp } = JSON.parse(savedState);
       setMode(savedMode);
       setCustomTime(savedCustomTime);
-      setTime(seconds);
-      setIsActive(savedIsActive);
-      workerRef.current.postMessage({ type: 'restoreState', value: { seconds, mode: savedMode } });
-      if(savedIsActive) {
+      
+      const elapsed = timestamp ? Math.round((Date.now() - timestamp) / 1000) : 0;
+      const newTime = Math.max(0, seconds - elapsed);
+      
+      setTime(newTime);
+      
+      const shouldBeActive = newTime > 0 && !!timestamp;
+      setIsActive(shouldBeActive);
+
+      workerRef.current.postMessage({ type: 'restoreState', value: { seconds, mode: savedMode, timestamp } });
+      
+      if(shouldBeActive) {
         workerRef.current.postMessage({ type: 'start' });
       }
     } else {
@@ -64,7 +72,11 @@ export function PomodoroTimer() {
             alarm.play().catch(error => console.error(`Could not play alarm: ${alarmFile}`, error));
             localStorage.removeItem('pomodoroState');
         } else if (type === "saveState") {
-            localStorage.setItem('pomodoroState', JSON.stringify({ ...value, isActive, customTime }));
+            if (isActive) {
+              localStorage.setItem('pomodoroState', JSON.stringify({ ...value, customTime }));
+            } else {
+                localStorage.removeItem('pomodoroState');
+            }
         }
     };
 
