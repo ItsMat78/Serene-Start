@@ -1,10 +1,10 @@
+
 let timer: NodeJS.Timeout | null = null;
 let seconds = 0;
-let mode = 'pomodoro';
-let timestamp = 0;
+let mode: 'pomodoro' | 'shortBreak' | 'longBreak' = 'pomodoro';
 
 const saveState = () => {
-  timestamp = Date.now();
+  const timestamp = timer ? Date.now() : null;
   self.postMessage({ type: 'saveState', value: { seconds, mode, timestamp } });
 };
 
@@ -13,50 +13,52 @@ self.onmessage = (e: MessageEvent) => {
 
   switch (type) {
     case 'start':
-      if (timer) clearInterval(timer);
+      if (timer) return;
       timer = setInterval(() => {
-        seconds--;
-        self.postMessage({ type: 'tick', value: seconds });
-        if (seconds <= 0) {
-          if (timer) clearInterval(timer);
-          timer = null;
-          self.postMessage({ type: 'alarm', value: mode });
+        if (seconds > 0) {
+          seconds--;
+          self.postMessage({ type: 'tick', value: seconds });
+          if (seconds === 0) {
+            if (timer) clearInterval(timer);
+            timer = null;
+            self.postMessage({ type: 'alarm', value: mode });
+            saveState();
+          }
         }
-        saveState();
       }, 1000);
-      break;
-    case 'pause':
-      if (timer) clearInterval(timer);
-      timer = null;
       saveState();
       break;
+
+    case 'pause':
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      saveState();
+      break;
+
     case 'reset':
-      if (timer) clearInterval(timer);
-      timer = null;
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
       seconds = value;
       self.postMessage({ type: 'tick', value: seconds });
       saveState();
       break;
-    case 'set':
-      seconds = value;
-      saveState();
-      break;
+    
     case 'setMode':
       mode = value;
-      saveState();
       break;
-    case 'restoreState':
-      const { seconds: savedSeconds, mode: savedMode, timestamp: savedTimestamp } = value;
-      seconds = savedSeconds;
-      mode = savedMode;
 
-      if (savedTimestamp && timer === null) {
-        const elapsedSeconds = Math.round((Date.now() - savedTimestamp) / 1000);
-        seconds = Math.max(0, seconds - elapsedSeconds);
-      }
+    case 'setState':
+        seconds = value.seconds;
+        mode = value.mode;
+        break;
 
-      self.postMessage({ type: 'tick', value: seconds });
-      break;
+    case 'set': 
+        seconds = value;
+        break;
   }
 };
 

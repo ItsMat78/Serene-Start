@@ -34,28 +34,36 @@ export function PomodoroTimer() {
 
   useEffect(() => {
     workerRef.current = new Worker(new URL('../../workers/timer.worker.ts', import.meta.url));
-    
-    const savedState = localStorage.getItem('pomodoroState');
-    if (savedState) {
-      const { seconds, mode: savedMode, customTime: savedCustomTime, timestamp } = JSON.parse(savedState);
-      setMode(savedMode);
-      setCustomTime(savedCustomTime);
-      
-      const elapsed = timestamp ? Math.round((Date.now() - timestamp) / 1000) : 0;
-      const newTime = Math.max(0, seconds - elapsed);
-      
-      setTime(newTime);
-      
-      const shouldBeActive = newTime > 0 && !!timestamp;
-      setIsActive(shouldBeActive);
 
-      workerRef.current.postMessage({ type: 'restoreState', value: { seconds, mode: savedMode, timestamp } });
-      
-      if(shouldBeActive) {
-        workerRef.current.postMessage({ type: 'start' });
-      }
+    const savedStateJSON = localStorage.getItem('pomodoroState');
+    if (savedStateJSON) {
+        const savedState = JSON.parse(savedStateJSON);
+        const { seconds: savedSeconds, mode: savedMode, customTime: savedCustomTime, timestamp } = savedState;
+        
+        setMode(savedMode);
+        setCustomTime(savedCustomTime || PRESETS.pomodoro);
+
+        let newTime;
+        if (timestamp) {
+            const elapsed = Math.round((Date.now() - timestamp) / 1000);
+            newTime = Math.max(0, savedSeconds - elapsed);
+        } else {
+            newTime = savedSeconds;
+        }
+
+        setTime(newTime);
+        const shouldBeActive = newTime > 0 && !!timestamp;
+        setIsActive(shouldBeActive);
+
+        workerRef.current.postMessage({ type: 'setState', value: { seconds: newTime, mode: savedMode } });
+        
+        if (shouldBeActive) {
+            workerRef.current.postMessage({ type: 'start' });
+        }
     } else {
-        workerRef.current.postMessage({ type: 'set', value: getActivePreset() });
+        const initialTime = getActivePreset();
+        setTime(initialTime);
+        workerRef.current.postMessage({ type: 'set', value: initialTime });
         workerRef.current.postMessage({ type: 'setMode', value: mode });
     }
 
@@ -70,12 +78,11 @@ export function PomodoroTimer() {
             const alarmFile = `/sounds/${value}_alarm.wav`;
             const alarm = new Audio(alarmFile);
             alarm.play().catch(error => console.error(`Could not play alarm: ${alarmFile}`, error));
-            localStorage.removeItem('pomodoroState');
         } else if (type === "saveState") {
-            if (isActive) {
+            if (isActive || value.timestamp) {
               localStorage.setItem('pomodoroState', JSON.stringify({ ...value, customTime }));
             } else {
-                localStorage.removeItem('pomodoroState');
+              localStorage.removeItem('pomodoroState');
             }
         }
     };
@@ -110,7 +117,6 @@ export function PomodoroTimer() {
     workerRef.current?.postMessage({type: "reset", value: newTime})
     setIsActive(false);
     setTime(newTime);
-    localStorage.removeItem('pomodoroState');
   }, [mode, customTime]);
 
   const changeMode = (newMode: Mode) => {
@@ -121,7 +127,6 @@ export function PomodoroTimer() {
     setTime(newTime);
     workerRef.current?.postMessage({type: "reset", value: newTime});
     workerRef.current?.postMessage({ type: 'setMode', value: newMode });
-    localStorage.removeItem('pomodoroState');
   };
   
   const handleSaveCustomTime = () => {
@@ -156,8 +161,9 @@ export function PomodoroTimer() {
 
   const progress = useMemo(() => {
     const total = getActivePreset();
-    if (total === 0) return 0;
-    return (1 - time / total) * 100;
+    if (total === 0) return 100;
+    const p = (1 - time / total) * 100;
+    return isNaN(p) ? 0 : p;
   }, [time, mode, customTime]);
   
   const renderTimeDisplay = (isMobileLayout: boolean) => {
