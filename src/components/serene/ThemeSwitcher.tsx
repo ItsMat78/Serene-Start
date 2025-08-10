@@ -80,7 +80,7 @@ export function ThemeSwitcherDialog({ open, onOpenChange }: ThemeSwitcherDialogP
   const isUserAuthenticated = !!user;
   const isInitialSetup = !user && !name;
 
-  const dialogTitle = isInitialSetup ? "Welcome to Serene Start!" : "Settings";
+  const dialogTitle = isInitialSetup ? "Welcome to Serenity Start!" : "Settings";
   const dialogDescription = isInitialSetup ? "Sign in to sync your data, or just set a local name to get started." : "Customize your experience.";
 
   return (
