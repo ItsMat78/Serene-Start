@@ -141,7 +141,7 @@ function LoadingSkeleton({ isMobile }: { isMobile: boolean }) {
   }
 
   return (
-    <div className="bg-background">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         <Header />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">

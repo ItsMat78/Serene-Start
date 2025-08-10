@@ -62,6 +62,8 @@ export function TodoList() {
           </div>
         ),
       });
+      const alarm = new Audio('/sounds/task_complete.wav');
+      alarm.play().catch(error => console.error('Could not play alarm', error));
     }
   };
 
