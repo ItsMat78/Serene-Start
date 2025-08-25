@@ -6,13 +6,13 @@ import type { Task } from '@/lib/types';
 import { AddTaskForm } from './AddTaskForm';
 import { TaskItem } from './TaskItem';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AnimatePresence, motion } from 'framer-motion';
 import { Confetti } from './Confetti';
 import { useToast } from '@/hooks/use-toast';
 import { PartyPopper } from 'lucide-react';
 import { useAppContext } from '@/hooks/use-theme';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd';
 
 const TASK_COLORS = ['#64B5F6', '#81C784', '#FFD54F', '#FF8A65', '#9575CD', '#F06292'];
 
@@ -21,6 +21,10 @@ export function TodoList() {
   const [showConfetti, setShowConfetti] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [isDragging, setIsDragging] = useState(false);
+
+  const ongoingTasks = tasks.filter((task) => !task.completed);
+  const completedTasks = tasks.filter((task) => task.completed);
 
   const handleAddTask = (title: string, description?: string) => {
     const newTask: Task = {
@@ -79,116 +83,143 @@ export function TodoList() {
     setTasks(updatedTasks);
   };
 
-  const ongoingTasks = tasks.filter((task) => !task.completed);
-  const completedTasks = tasks.filter((task) => task.completed);
-  
+  const onDragEnd = (result: DropResult) => {
+    setIsDragging(false);
+    const { source, destination, draggableId } = result;
+
+    if (!destination) return;
+
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    const finalTasks = Array.from(tasks);
+    const [reorderedItem] = finalTasks.splice(tasks.findIndex(t => t.id === draggableId), 1);
+    
+    if (source.droppableId !== destination.droppableId) {
+        reorderedItem.completed = !reorderedItem.completed;
+    }
+
+    const ongoing = finalTasks.filter(t => !t.completed);
+    const completed = finalTasks.filter(t => t.completed);
+
+    if (destination.droppableId === 'ongoing') {
+        ongoing.splice(destination.index, 0, reorderedItem);
+    } else {
+        completed.splice(destination.index, 0, reorderedItem);
+    }
+
+    setTasks([...ongoing, ...completed]);
+  };
+
   const taskContainerClasses = cn(
-    isMobile ? "flex flex-col gap-1" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+    isMobile ? "flex flex-col gap-1" : "grid [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))] gap-6 items-start"
+  );
+
+  const renderTaskList = (tasksToRender: Task[], droppableId: string) => (
+    <Droppable droppableId={droppableId}>
+      {(provided) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.droppableProps}
+          className={taskContainerClasses}
+        >
+          {tasksToRender.map((task, index) => (
+            <Draggable key={task.id} draggableId={task.id} index={index}>
+              {(provided, snapshot) => (
+                <TaskItem
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  isDragging={snapshot.isDragging}
+                  task={task}
+                  onToggle={handleToggleTask}
+                  onDelete={handleDeleteTask}
+                  onUpdate={handleUpdateTask}
+                />
+              )}
+            </Draggable>
+          ))}
+          {provided.placeholder}
+        </div>
+      )}
+    </Droppable>
   );
 
   if (isMobile) {
     return (
+      <DragDropContext onDragStart={() => setIsDragging(true)} onDragEnd={onDragEnd}>
         <div className="space-y-4">
-            <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg">
+            <Card className={cn(
+                "bg-card/80 border-border/50 shadow-lg",
+                !isDragging && "backdrop-blur-sm"
+            )}>
                 <CardContent className="p-3 space-y-3">
                     <AddTaskForm onAddTask={handleAddTask} />
-                    <div className={taskContainerClasses}>
-                        <AnimatePresence>
-                        {ongoingTasks.map((task) => (
-                            <TaskItem
-                                key={task.id}
-                                task={task}
-                                onToggle={handleToggleTask}
-                                onDelete={handleDeleteTask}
-                                onUpdate={handleUpdateTask}
-                            />
-                        ))}
-                        </AnimatePresence>
-                    </div>
+                    {renderTaskList(ongoingTasks, 'ongoing')}
                 </CardContent>
             </Card>
 
             {completedTasks.length > 0 && (
-                <Card className="bg-card/60 backdrop-blur-sm border-border/30 shadow-lg">
+                <Card className={cn(
+                    "bg-card/60 border-border/30 shadow-lg",
+                    !isDragging && "backdrop-blur-sm"
+                )}>
                     <CardHeader className="p-3">
                         <CardTitle className="font-headline text-xl text-shadow">Completed</CardTitle>
                     </CardHeader>
                     <CardContent className="p-3 pt-0">
-                        <div className={taskContainerClasses}>
-                            <AnimatePresence>
-                            {completedTasks.map((task) => (
-                                <TaskItem
-                                    key={task.id}
-                                    task={task}
-                                    onToggle={handleToggleTask}
-                                    onDelete={handleDeleteTask}
-                                    onUpdate={handleUpdateTask}
-                                />
-                            ))}
-                            </AnimatePresence>
-                        </div>
+                        {renderTaskList(completedTasks, 'completed')}
                     </CardContent>
                 </Card>
             )}
         </div>
+      </DragDropContext>
     );
   }
 
   return (
-    <div className="relative space-y-10">
-      {showConfetti && <Confetti />}
+    <DragDropContext onDragStart={() => setIsDragging(true)} onDragEnd={onDragEnd}>
+      <div className="relative space-y-10">
+        {showConfetti && <Confetti />}
 
-      <motion.div layout className="space-y-10">
-        <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-lg">
-          <CardContent className="p-6">
-            <div className="pb-4">
-              <AddTaskForm onAddTask={handleAddTask} />
-            </div>
-            {ongoingTasks.length > 0 ? (
-              <div className={taskContainerClasses}>
-                <AnimatePresence>
-                  {ongoingTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      onToggle={handleToggleTask}
-                      onDelete={handleDeleteTask}
-                      onUpdate={handleUpdateTask}
-                    />
-                  ))}
-                </AnimatePresence>
+        <div className="space-y-10">
+          <Card className={cn(
+              "bg-card/80 border-border/50 shadow-lg",
+              !isDragging && "backdrop-blur-sm"
+          )}>
+            <CardContent className="p-6">
+              <div className="pb-4">
+                <AddTaskForm onAddTask={handleAddTask} />
               </div>
-            ) : (
-              <p className="text-muted-foreground p-4 text-center">
-                Nothing to do! Add a task above.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {completedTasks.length > 0 && (
-          <Card className="bg-card/60 backdrop-blur-sm border-border/30 shadow-lg">
-            <CardHeader>
-              <CardTitle className="font-headline text-2xl text-shadow">Completed</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className={taskContainerClasses}>
-                <AnimatePresence>
-                  {completedTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      onToggle={handleToggleTask}
-                      onDelete={handleDeleteTask}
-                      onUpdate={handleUpdateTask}
-                    />
-                  ))}
-                </AnimatePresence>
-              </div>
+              {ongoingTasks.length > 0 ? (
+                renderTaskList(ongoingTasks, 'ongoing')
+              ) : (
+                <p className="text-muted-foreground p-4 text-center">
+                  Nothing to do! Add a task above.
+                </p>
+              )}
             </CardContent>
           </Card>
-        )}
-      </motion.div>
-    </div>
+
+          {completedTasks.length > 0 && (
+            <Card className={cn(
+                "bg-card/60 border-border/30 shadow-lg",
+                !isDragging && "backdrop-blur-sm"
+            )}>
+              <CardHeader>
+                <CardTitle className="font-headline text-2xl text-shadow">Completed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {renderTaskList(completedTasks, 'completed')}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </DragDropContext>
   );
 }
